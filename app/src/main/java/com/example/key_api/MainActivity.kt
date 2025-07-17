@@ -13,6 +13,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -57,6 +58,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var queryInput: EditText
     private lateinit var placeholderMessage: TextView
     private lateinit var moviesList: RecyclerView
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,6 +84,7 @@ class MainActivity : AppCompatActivity() {
         searchButton = findViewById(R.id.searchButton)
         queryInput = findViewById(R.id.queryInput)
         moviesList = findViewById(R.id.movies)
+        progressBar = findViewById(R.id.progressBar)
         adapter.movies = movies
         moviesList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         moviesList.adapter = adapter
@@ -109,16 +112,23 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun search() {
-        imdbService.getMovies(key, queryInput.text.toString())
-            .enqueue(object : Callback<MoviesResponse> {
-                override fun onResponse(
-                    call: Call<MoviesResponse>,
-                    response: Response<MoviesResponse>
-                ) {
-                    when (response.code()) {
-                        200 -> {
+        if (queryInput.text.isNotEmpty()) {
+
+            placeholderMessage.visibility = View.GONE
+            moviesList.visibility = View.GONE
+            progressBar.visibility = View.VISIBLE
+
+            imdbService.getMovies(key, queryInput.text.toString())
+                .enqueue(object : Callback<MoviesResponse> {
+                    override fun onResponse(
+                        call: Call<MoviesResponse>,
+                        response: Response<MoviesResponse>
+                    ) {
+                        progressBar.visibility = View.GONE
+                        if (response.code() == 200) {
                             movies.clear()
                             if (response.body()?.results?.isNotEmpty() == true) {
+                                moviesList.visibility = View.VISIBLE
                                 movies.addAll(response.body()?.results!!)
                                 adapter.notifyDataSetChanged()
                             }
@@ -127,25 +137,21 @@ class MainActivity : AppCompatActivity() {
                             } else {
                                 showMessage("", "")
                             }
+                        } else {
+                            showMessage(
+                                getString(R.string.something_went_wrong),
+                                response.code().toString()
+                            )
                         }
-
-                        401 -> showMessage(
-                            getString(R.string.unauthorized),
-                            response.code().toString()
-                        )
-
-                        else -> showMessage(
-                            getString(R.string.something_went_wrong),
-                            response.code().toString()
-                        )
                     }
-                }
 
-                override fun onFailure(call: Call<MoviesResponse>, t: Throwable) {
-                    showMessage(getString(R.string.something_went_wrong), t.message.toString())
-                }
+                    override fun onFailure(call: Call<MoviesResponse>, t: Throwable) {
+                        progressBar.visibility = View.GONE
+                        showMessage(getString(R.string.something_went_wrong), t.message.toString())
+                    }
 
-            })
+                })
+        }
     }
 
     private fun showMessage(text: String, additionalMessage: String) {
