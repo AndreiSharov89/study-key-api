@@ -1,5 +1,6 @@
 package com.example.key_api
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -14,6 +15,7 @@ class MovieViewHolder(parent: ViewGroup) :
     private val title: TextView = itemView.findViewById(R.id.movie_title)
     private val description: TextView = itemView.findViewById(R.id.movie_description)
     private val trackImage: ImageView = itemView.findViewById(R.id.movie_image)
+
 
     fun bind(movie: Movie){
         title.text = movie.title

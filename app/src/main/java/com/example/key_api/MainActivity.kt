@@ -1,8 +1,13 @@
 package com.example.key_api
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings.Global.getString
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
@@ -35,7 +40,18 @@ class MainActivity : AppCompatActivity() {
 
     private val movies = ArrayList<Movie>()
 
-    private val adapter = MoviesAdapter()
+    private val adapter = MoviesAdapter {
+        if (clickDebounce()) {
+            val intent = Intent(this, PosterActivity::class.java)
+            intent.putExtra("poster", it.image)
+            startActivity(intent)
+        }
+    }
+    private var isClickAllowed = true
+
+    private val handler = Handler(Looper.getMainLooper())
+
+    private val searchRunnable = Runnable { search() }
 
     private lateinit var searchButton: Button
     private lateinit var queryInput: EditText
@@ -59,7 +75,8 @@ class MainActivity : AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
 
-        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val inputMethodManager =
+            getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
         placeholderMessage = findViewById(R.id.placeholderMessage)
         searchButton = findViewById(R.id.searchButton)
@@ -75,6 +92,19 @@ class MainActivity : AppCompatActivity() {
                 inputMethodManager.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
             }
         }
+
+        queryInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                searchDebounce()
+            }
+
+            override fun afterTextChanged(p0: Editable?) {
+            }
+
+        })
     }
 
 
@@ -109,7 +139,6 @@ class MainActivity : AppCompatActivity() {
                             response.code().toString()
                         )
                     }
-
                 }
 
                 override fun onFailure(call: Call<MoviesResponse>, t: Throwable) {
@@ -132,5 +161,24 @@ class MainActivity : AppCompatActivity() {
         } else {
             placeholderMessage.visibility = View.GONE
         }
+    }
+
+    private fun clickDebounce(): Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+        }
+        return current
+    }
+
+    private fun searchDebounce() {
+        handler.removeCallbacks(searchRunnable)
+        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
+    }
+
+    companion object {
+        private const val CLICK_DEBOUNCE_DELAY = 1000L
+        private const val SEARCH_DEBOUNCE_DELAY = 2000L
     }
 }
