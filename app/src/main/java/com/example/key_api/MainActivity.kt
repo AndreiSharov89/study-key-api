@@ -21,6 +21,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.awaitAll
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -117,6 +118,7 @@ class MainActivity : AppCompatActivity() {
             placeholderMessage.visibility = View.GONE
             moviesList.visibility = View.GONE
             progressBar.visibility = View.VISIBLE
+            progressBar.progress = 40
 
             imdbService.getMovies(key, queryInput.text.toString())
                 .enqueue(object : Callback<MoviesResponse> {
@@ -124,6 +126,7 @@ class MainActivity : AppCompatActivity() {
                         call: Call<MoviesResponse>,
                         response: Response<MoviesResponse>
                     ) {
+                        progressBar.progress = 80
                         progressBar.visibility = View.GONE
                         if (response.code() == 200) {
                             movies.clear()
@@ -146,6 +149,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     override fun onFailure(call: Call<MoviesResponse>, t: Throwable) {
+                        progressBar.progress = 10
                         progressBar.visibility = View.GONE
                         showMessage(getString(R.string.something_went_wrong), t.message.toString())
                     }
