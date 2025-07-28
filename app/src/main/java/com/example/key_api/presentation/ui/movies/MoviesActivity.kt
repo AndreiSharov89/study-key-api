@@ -103,10 +103,11 @@ class MoviesActivity : AppCompatActivity() {
     private fun search() {
         val expression = queryInput.text.toString()
         if (expression.isEmpty()) return
-            placeholderMessage.visibility = View.GONE
-            moviesList.visibility = View.GONE
-            progressBar.visibility = View.VISIBLE
-            progressBar.progress = 40
+
+        placeholderMessage.visibility = View.GONE
+        moviesList.visibility = View.GONE
+        progressBar.visibility = View.VISIBLE
+        progressBar.progress = 40
 
         interactor.searchMovies(expression, object : MoviesInteractor.MoviesConsumer {
             override fun consume(foundMovies: List<Movie>) {
