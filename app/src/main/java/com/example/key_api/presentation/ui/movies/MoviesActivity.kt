@@ -1,11 +1,10 @@
-package com.example.key_api
+package com.example.key_api.presentation.ui.movies
 
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings.Global.getString
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -21,27 +20,15 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.awaitAll
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import com.example.key_api.Creator
+import com.example.key_api.R
+import com.example.key_api.domain.api.MoviesInteractor
+import com.example.key_api.domain.models.Movie
+import com.example.key_api.presentation.ui.posters.PosterActivity
 
-class MainActivity : AppCompatActivity() {
-
-    private val imdbBaseUrl = "https://tv-api.com"
-    private val key: String = BuildConfig.API_KEY
-
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(imdbBaseUrl)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    private val imdbService = retrofit.create(ImdbApi::class.java)
+class MoviesActivity : AppCompatActivity() {
 
     private val movies = ArrayList<Movie>()
-
     private val adapter = MoviesAdapter {
         if (clickDebounce()) {
             val intent = Intent(this, PosterActivity::class.java)
@@ -49,10 +36,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
+
+    private val interactor: MoviesInteractor = Creator.provideMoviesInteractor()
     private var isClickAllowed = true
-
     private val handler = Handler(Looper.getMainLooper())
-
     private val searchRunnable = Runnable { search() }
 
     private lateinit var searchButton: Button
@@ -86,8 +73,9 @@ class MainActivity : AppCompatActivity() {
         queryInput = findViewById(R.id.queryInput)
         moviesList = findViewById(R.id.movies)
         progressBar = findViewById(R.id.progressBar)
+
         adapter.movies = movies
-        moviesList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        moviesList.layoutManager = LinearLayoutManager(this)
         moviesList.adapter = adapter
 
         searchButton.setOnClickListener {
@@ -98,78 +86,54 @@ class MainActivity : AppCompatActivity() {
         }
 
         queryInput.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun afterTextChanged(s: Editable?) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 searchDebounce()
             }
-
-            override fun afterTextChanged(p0: Editable?) {
-            }
-
         })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(searchRunnable)
     }
 
 
     private fun search() {
-        if (queryInput.text.isNotEmpty()) {
-
+        val expression = queryInput.text.toString()
+        if (expression.isEmpty()) return
             placeholderMessage.visibility = View.GONE
             moviesList.visibility = View.GONE
             progressBar.visibility = View.VISIBLE
             progressBar.progress = 40
 
-            imdbService.getMovies(key, queryInput.text.toString())
-                .enqueue(object : Callback<MoviesResponse> {
-                    override fun onResponse(
-                        call: Call<MoviesResponse>,
-                        response: Response<MoviesResponse>
-                    ) {
-                        progressBar.progress = 80
-                        progressBar.visibility = View.GONE
-                        if (response.code() == 200) {
-                            movies.clear()
-                            if (response.body()?.results?.isNotEmpty() == true) {
-                                moviesList.visibility = View.VISIBLE
-                                movies.addAll(response.body()?.results!!)
-                                adapter.notifyDataSetChanged()
-                            }
-                            if (movies.isEmpty()) {
-                                showMessage(getString(R.string.nothing_found), "")
-                            } else {
-                                showMessage("", "")
-                            }
-                        } else {
-                            showMessage(
-                                getString(R.string.something_went_wrong),
-                                response.code().toString()
-                            )
-                        }
-                    }
+        interactor.searchMovies(expression, object : MoviesInteractor.MoviesConsumer {
+            override fun consume(foundMovies: List<Movie>) {
+                runOnUiThread {
+                    progressBar.visibility = View.GONE
+                    movies.clear()
+                    movies.addAll(foundMovies)
+                    adapter.notifyDataSetChanged()
 
-                    override fun onFailure(call: Call<MoviesResponse>, t: Throwable) {
-                        progressBar.progress = 10
-                        progressBar.visibility = View.GONE
-                        showMessage(getString(R.string.something_went_wrong), t.message.toString())
+                    if (foundMovies.isEmpty()) {
+                        showMessage(getString(R.string.nothing_found))
+                    } else {
+                        placeholderMessage.visibility = View.GONE
+                        moviesList.visibility = View.VISIBLE
                     }
-
-                })
-        }
+                }
+            }
+        })
     }
 
-    private fun showMessage(text: String, additionalMessage: String) {
-        if (text.isNotEmpty()) {
-            placeholderMessage.visibility = View.VISIBLE
-            movies.clear()
-            adapter.notifyDataSetChanged()
-            placeholderMessage.text = text
-            if (additionalMessage.isNotEmpty()) {
-                Toast.makeText(applicationContext, additionalMessage, Toast.LENGTH_LONG)
-                    .show()
-            }
-        } else {
-            placeholderMessage.visibility = View.GONE
+    private fun showMessage(text: String, toastMessage: String? = null) {
+        placeholderMessage.text = text
+        placeholderMessage.visibility = View.VISIBLE
+        movies.clear()
+        adapter.notifyDataSetChanged()
+        toastMessage?.let {
+            Toast.makeText(this, it, Toast.LENGTH_LONG).show()
         }
     }
 

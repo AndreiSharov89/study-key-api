@@ -1,8 +1,8 @@
-package com.example.key_api
+package com.example.key_api.presentation.ui.movies
 
-import android.content.Intent
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.key_api.domain.models.Movie
 
 class MoviesAdapter(val clickListener: MovieClickListener) : RecyclerView.Adapter<MovieViewHolder>() {
 

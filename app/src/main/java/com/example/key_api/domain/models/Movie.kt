@@ -1,4 +1,4 @@
-package com.example.key_api
+package com.example.key_api.domain.models
 
 data class Movie(val id: String,
                  val resultType: String,
