@@ -113,9 +113,11 @@ class MoviesActivity : AppCompatActivity() {
             override fun consume(foundMovies: List<Movie>) {
                 runOnUiThread {
                     progressBar.visibility = View.GONE
+                    val oldSize = movies.size
                     movies.clear()
+                    adapter.notifyItemRangeRemoved(0, oldSize)
                     movies.addAll(foundMovies)
-                    adapter.notifyDataSetChanged()
+                    adapter.notifyItemRangeInserted(0, foundMovies.size)
 
                     if (foundMovies.isEmpty()) {
                         showMessage(getString(R.string.nothing_found))
@@ -131,8 +133,9 @@ class MoviesActivity : AppCompatActivity() {
     private fun showMessage(text: String, toastMessage: String? = null) {
         placeholderMessage.text = text
         placeholderMessage.visibility = View.VISIBLE
+        val size = movies.size
         movies.clear()
-        adapter.notifyDataSetChanged()
+        adapter.notifyItemRangeRemoved(0, size)
         toastMessage?.let {
             Toast.makeText(this, it, Toast.LENGTH_LONG).show()
         }
