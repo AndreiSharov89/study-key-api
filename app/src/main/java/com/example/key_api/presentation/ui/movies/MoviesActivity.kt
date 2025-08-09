@@ -28,7 +28,15 @@ import com.example.key_api.presentation.ui.posters.PosterActivity
 
 class MoviesActivity : AppCompatActivity() {
 
+    private lateinit var queryInput: EditText
+    private lateinit var placeholderMessage: TextView
+    private lateinit var moviesList: RecyclerView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var searchButton: Button
+    private val moviesInteractor = Creator.provideMoviesInteractor()
+
     private val movies = ArrayList<Movie>()
+
     private val adapter = MoviesAdapter {
         if (clickDebounce()) {
             val intent = Intent(this, PosterActivity::class.java)
@@ -36,17 +44,11 @@ class MoviesActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
-
-    private val interactor: MoviesInteractor = Creator.provideMoviesInteractor()
     private var isClickAllowed = true
-    private val handler = Handler(Looper.getMainLooper())
-    private val searchRunnable = Runnable { search() }
 
-    private lateinit var searchButton: Button
-    private lateinit var queryInput: EditText
-    private lateinit var placeholderMessage: TextView
-    private lateinit var moviesList: RecyclerView
-    private lateinit var progressBar: ProgressBar
+    private val handler = Handler(Looper.getMainLooper())
+
+    private val searchRunnable = Runnable { searchRequest() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,7 +82,7 @@ class MoviesActivity : AppCompatActivity() {
 
         searchButton.setOnClickListener {
             if (queryInput.text.isNotEmpty()) {
-                search()
+                searchRequest()
                 inputMethodManager.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
             }
         }
@@ -100,34 +102,32 @@ class MoviesActivity : AppCompatActivity() {
     }
 
 
-    private fun search() {
-        val expression = queryInput.text.toString()
-        if (expression.isEmpty()) return
+    private fun searchRequest() {
+        if (queryInput.text.isNotEmpty()) {
 
-        placeholderMessage.visibility = View.GONE
-        moviesList.visibility = View.GONE
-        progressBar.visibility = View.VISIBLE
-        progressBar.progress = 40
+            placeholderMessage.visibility = View.GONE
+            moviesList.visibility = View.GONE
+            progressBar.visibility = View.VISIBLE
 
-        interactor.searchMovies(expression, object : MoviesInteractor.MoviesConsumer {
-            override fun consume(foundMovies: List<Movie>) {
-                runOnUiThread {
-                    progressBar.visibility = View.GONE
-                    val oldSize = movies.size
-                    movies.clear()
-                    adapter.notifyItemRangeRemoved(0, oldSize)
-                    movies.addAll(foundMovies)
-                    adapter.notifyItemRangeInserted(0, foundMovies.size)
-
-                    if (foundMovies.isEmpty()) {
-                        showMessage(getString(R.string.nothing_found))
-                    } else {
-                        placeholderMessage.visibility = View.GONE
-                        moviesList.visibility = View.VISIBLE
+            moviesInteractor.searchMovies(
+                queryInput.text.toString(),
+                object : MoviesInteractor.MoviesConsumer {
+                    override fun consume(foundMovies: List<Movie>) {
+                        handler.post {
+                            progressBar.visibility = View.GONE
+                            movies.clear()
+                            movies.addAll(foundMovies)
+                            moviesList.visibility = View.VISIBLE
+                            adapter.notifyDataSetChanged()
+                            if (movies.isEmpty()) {
+                                showMessage(getString(R.string.nothing_found), "")
+                            } else {
+                                hideMessage()
+                            }
+                        }
                     }
-                }
-            }
-        })
+                })
+        }
     }
 
     private fun showMessage(text: String, toastMessage: String? = null) {
@@ -139,6 +139,10 @@ class MoviesActivity : AppCompatActivity() {
         toastMessage?.let {
             Toast.makeText(this, it, Toast.LENGTH_LONG).show()
         }
+    }
+
+    private fun hideMessage() {
+        placeholderMessage.visibility = View.GONE
     }
 
     private fun clickDebounce(): Boolean {
