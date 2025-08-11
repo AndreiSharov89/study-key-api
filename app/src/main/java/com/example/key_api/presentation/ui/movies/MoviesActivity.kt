@@ -50,9 +50,12 @@ class MoviesActivity : AppCompatActivity() {
 
     private val searchRunnable = Runnable { searchRequest() }
 
+    private val moviesSearchController = Creator.provideMoviesSearchController(this, adapter)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        moviesSearchController.onCreate()
         val rootView = findViewById<LinearLayout>(R.id.main_root_view)
 
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
@@ -99,6 +102,7 @@ class MoviesActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacks(searchRunnable)
+        moviesSearchController.onDestroy()
     }
 
 
