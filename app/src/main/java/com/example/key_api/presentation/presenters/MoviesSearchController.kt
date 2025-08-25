@@ -12,11 +12,12 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.key_api.Creator
 import com.example.key_api.R
 import com.example.key_api.domain.api.MoviesInteractor
 import com.example.key_api.domain.models.Movie
 import com.example.key_api.presentation.ui.movies.MoviesAdapter
+import com.example.key_api.util.Creator
+import java.util.concurrent.Executors
 
 class MoviesSearchController(
     private val activity: Activity,
@@ -37,6 +38,7 @@ class MoviesSearchController(
     private val movies = ArrayList<Movie>()
 
     private val handler = Handler(Looper.getMainLooper())
+    private val executor = Executors.newSingleThreadExecutor()
 
     private val searchRunnable = Runnable { searchRequest() }
 
@@ -48,7 +50,7 @@ class MoviesSearchController(
     fun onCreate() {
         placeholderMessage = activity.findViewById(R.id.placeholderMessage)
         queryInput = activity.findViewById(R.id.queryInput)
-        moviesList = activity.findViewById(R.id.main_root_view)
+        moviesList = activity.findViewById(R.id.movies)
         progressBar = activity.findViewById(R.id.progressBar)
 
         adapter.movies = movies
@@ -71,31 +73,40 @@ class MoviesSearchController(
         })
     }
 
+
     private fun searchRequest() {
         if (queryInput.text.isNotEmpty()) {
-
             placeholderMessage.visibility = View.GONE
             moviesList.visibility = View.GONE
             progressBar.visibility = View.VISIBLE
 
-            moviesInteractor.searchMovies(
-                queryInput.text.toString(),
-                object : MoviesInteractor.MoviesConsumer {
-                    override fun consume(foundMovies: List<Movie>) {
+            val expression = queryInput.text.toString()
+
+            executor.execute {
+                moviesInteractor.searchMovies(expression, object : MoviesInteractor.MoviesConsumer {
+                    override fun consume(foundMovies: List<Movie>?, errorMessage: String?) {
                         handler.post {
                             progressBar.visibility = View.GONE
-                            movies.clear()
-                            movies.addAll(foundMovies)
-                            moviesList.visibility = View.VISIBLE
-                            adapter.notifyDataSetChanged()
-                            if (movies.isEmpty()) {
-                                showMessage(activity.getString(R.string.nothing_found), "")
-                            } else {
+
+                            if (foundMovies != null) {
+                                movies.clear()
+                                movies.addAll(foundMovies)
+                                adapter.notifyDataSetChanged()
+                                moviesList.visibility = View.VISIBLE
                                 hideMessage()
+                                if (foundMovies.isEmpty()) {
+                                    showMessage(activity.getString(R.string.nothing_found), "")
+                                }
+                            } else if (errorMessage != null) {
+                                showMessage(
+                                    activity.getString(R.string.something_went_wrong),
+                                    errorMessage
+                                )
                             }
                         }
                     }
                 })
+            }
         }
     }
 
@@ -116,5 +127,8 @@ class MoviesSearchController(
 
     private fun hideMessage() {
         placeholderMessage.visibility = View.GONE
+    }
+    fun onDestroy() {
+        handler.removeCallbacks(searchRunnable)
     }
 }

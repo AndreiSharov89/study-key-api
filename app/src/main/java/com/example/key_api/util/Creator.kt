@@ -1,7 +1,8 @@
-package com.example.key_api
+package com.example.key_api.util
 
 import android.app.Activity
 import android.content.Context
+import com.example.key_api.BuildConfig
 import com.example.key_api.data.MoviesRepositoryImpl
 import com.example.key_api.data.network.RetrofitNetworkClient
 import com.example.key_api.domain.api.MoviesInteractor
