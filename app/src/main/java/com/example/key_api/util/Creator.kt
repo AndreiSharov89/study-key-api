@@ -11,7 +11,6 @@ import com.example.key_api.presentation.presenters.movies.MoviesSearchPresenter
 import com.example.key_api.presentation.presenters.movies.MoviesView
 import com.example.key_api.presentation.presenters.posters.PosterPresenter
 import com.example.key_api.presentation.presenters.posters.PosterView
-import com.example.key_api.presentation.ui.movies.MoviesAdapter
 
 object Creator {
 
@@ -25,8 +24,7 @@ object Creator {
 
     fun provideMoviesSearchPresenter(
         moviesView: MoviesView,
-        context: Context,
-        adapter: MoviesAdapter
+        context: Context
     ): MoviesSearchPresenter {
         return MoviesSearchPresenter(
             view = moviesView,
