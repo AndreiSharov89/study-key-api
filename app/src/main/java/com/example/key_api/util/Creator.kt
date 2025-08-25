@@ -1,6 +1,5 @@
 package com.example.key_api.util
 
-import android.app.Activity
 import android.content.Context
 import com.example.key_api.BuildConfig
 import com.example.key_api.data.MoviesRepositoryImpl
@@ -8,8 +7,10 @@ import com.example.key_api.data.network.RetrofitNetworkClient
 import com.example.key_api.domain.api.MoviesInteractor
 import com.example.key_api.domain.api.MoviesRepository
 import com.example.key_api.domain.impl.MoviesInteractorImpl
-import com.example.key_api.presentation.presenters.MoviesSearchController
-import com.example.key_api.presentation.presenters.PosterController
+import com.example.key_api.presentation.presenters.movies.MoviesSearchPresenter
+import com.example.key_api.presentation.presenters.movies.MoviesView
+import com.example.key_api.presentation.presenters.posters.PosterPresenter
+import com.example.key_api.presentation.presenters.posters.PosterView
 import com.example.key_api.presentation.ui.movies.MoviesAdapter
 
 object Creator {
@@ -22,14 +23,21 @@ object Creator {
         return MoviesInteractorImpl(getMoviesRepository(context))
     }
 
-    fun provideMoviesSearchController(
-        activity: Activity,
+    fun provideMoviesSearchPresenter(
+        moviesView: MoviesView,
+        context: Context,
         adapter: MoviesAdapter
-    ): MoviesSearchController {
-        return MoviesSearchController(activity, adapter)
+    ): MoviesSearchPresenter {
+        return MoviesSearchPresenter(
+            view = moviesView,
+            context = context,
+        )
     }
 
-    fun providePosterController(activity: Activity): PosterController {
-        return PosterController(activity)
+    fun providePosterPresenter(
+        posterView: PosterView,
+        imageUrl: String
+    ): PosterPresenter {
+        return PosterPresenter(posterView, imageUrl)
     }
 }
