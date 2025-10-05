@@ -1,17 +1,16 @@
 package com.example.key_api.presentation.presenters.movies
 
-import com.example.key_api.domain.models.Movie
+import moxy.MvpView
+import moxy.viewstate.strategy.AddToEndSingleStrategy
+import moxy.viewstate.strategy.OneExecutionStateStrategy
+import moxy.viewstate.strategy.StateStrategyType
 
-interface MoviesView {
-    fun showPlaceholderMessage(isVisible: Boolean)
+interface MoviesView : MvpView {
 
-    fun showMoviesList(isVisible: Boolean)
+    @StateStrategyType(AddToEndSingleStrategy::class)
+    fun render(state: MoviesState)
 
-    fun showProgressBar(isVisible: Boolean)
+    @StateStrategyType(OneExecutionStateStrategy::class)
+    fun showToast(additionalMessage: String)
 
-    fun changePlaceholderText(newPlaceholderText: String)
-
-    fun updateMoviesList(newMoviesList: List<Movie>)
-
-    fun showMessage(message: String)
 }

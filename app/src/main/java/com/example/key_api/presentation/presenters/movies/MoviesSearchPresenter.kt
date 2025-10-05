@@ -9,11 +9,15 @@ import com.example.key_api.R
 import com.example.key_api.domain.api.MoviesInteractor
 import com.example.key_api.domain.models.Movie
 import com.example.key_api.util.Creator
+import moxy.MvpPresenter
 
 class MoviesSearchPresenter(
-    private val view: MoviesView,
     private val context: Context
-) {
+) : MvpPresenter<MoviesView>() {
+    /*    private var view: MoviesView? = null
+        private var state: MoviesState? = null*/
+    private var latestSearchText: String? = null
+
     private val moviesInteractor = Creator.provideMoviesInteractor(context)
 
     companion object {
@@ -31,6 +35,11 @@ class MoviesSearchPresenter(
     }
 
     fun searchDebounce(changedText: String) {
+        if (latestSearchText == changedText) {
+            return
+        }
+
+        this.latestSearchText = changedText
         handler.removeCallbacksAndMessages(SEARCH_REQUEST_TOKEN)
 
         val searchRunnable = Runnable { searchRequest(changedText) }
@@ -51,67 +60,55 @@ class MoviesSearchPresenter(
         }
     }
 
-    fun onCreate() {
-        //adapter.movies = movies
-    }
-
-
     private fun searchRequest(newSearchText: String) {
         if (newSearchText.isNotEmpty()) {
-            view.showPlaceholderMessage(false)
-            view.showMoviesList(false)
-            view.showProgressBar(true)
+            renderState(MoviesState.Loading)
 
             moviesInteractor.searchMovies(newSearchText, object : MoviesInteractor.MoviesConsumer {
                 override fun consume(foundMovies: List<Movie>?, errorMessage: String?) {
                     handler.post {
-                        view.showProgressBar(false)
                         if (foundMovies != null) {
-
-                            // Обновляем список на экране
                             movies.clear()
                             movies.addAll(foundMovies)
-                            view.updateMoviesList(movies)
-                            view.showMoviesList(true)
                         }
-                        if (errorMessage != null) {
-                            showMessage(
-                                context.getString(R.string.something_went_wrong),
-                                errorMessage
-                            )
-                        } else if (movies.isEmpty()) {
-                            showMessage(context.getString(R.string.nothing_found), "")
-                        } else {
-                            hideMessage()
+
+                        when {
+                            errorMessage != null -> {
+                                renderState(
+                                    MoviesState.Error(
+                                        errorMessage = context.getString(R.string.something_went_wrong),
+                                    )
+                                )
+                            }
+
+                            movies.isEmpty() -> {
+                                renderState(
+                                    MoviesState.Empty(
+                                        message = context.getString(R.string.nothing_found),
+                                    )
+                                )
+                            }
+
+                            else -> {
+                                renderState(
+                                    MoviesState.Content(
+                                        movies = movies,
+                                    )
+                                )
+                            }
                         }
+
                     }
                 }
             })
         }
     }
 
-    private fun showMessage(text: String, additionalMessage: String) {
-        if (text.isNotEmpty()) {
-            view.showPlaceholderMessage(true)
-
-            movies.clear()
-            view.updateMoviesList(movies)
-
-            view.changePlaceholderText(text)
-            if (additionalMessage.isNotEmpty()) {
-                // Добавили метод показа Toast
-                view.showMessage(additionalMessage)
-            }
-        } else {
-            view.showPlaceholderMessage(false)
-        }
+    private fun renderState(state: MoviesState) {
+        viewState.render(state)
     }
 
-    private fun hideMessage() {
-        view.showPlaceholderMessage(false)
-    }
-
-    fun onDestroy() {
+    override fun onDestroy() {
         handler.removeCallbacksAndMessages(SEARCH_REQUEST_TOKEN)
     }
 }

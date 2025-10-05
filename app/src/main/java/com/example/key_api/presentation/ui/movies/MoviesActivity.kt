@@ -12,18 +12,22 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.key_api.R
 import com.example.key_api.domain.models.Movie
+import com.example.key_api.presentation.presenters.movies.MoviesSearchPresenter
+import com.example.key_api.presentation.presenters.movies.MoviesState
 import com.example.key_api.presentation.presenters.movies.MoviesView
 import com.example.key_api.presentation.ui.posters.PosterActivity
 import com.example.key_api.util.Creator
+import moxy.MvpActivity
+import moxy.presenter.InjectPresenter
+import moxy.presenter.ProvidePresenter
 
-class MoviesActivity : AppCompatActivity(), MoviesView {
+class MoviesActivity : MvpActivity(), MoviesView {
     private lateinit var queryInput: EditText
     private lateinit var placeholderMessage: TextView
     private lateinit var moviesList: RecyclerView
@@ -42,10 +46,15 @@ class MoviesActivity : AppCompatActivity(), MoviesView {
 
     private val handler = Handler(Looper.getMainLooper())
 
-    private val moviesSearchPresenter = Creator.provideMoviesSearchPresenter(
-        moviesView = this,
-        context = this
-    )
+    @InjectPresenter
+    lateinit var moviesSearchPresenter: MoviesSearchPresenter
+
+    @ProvidePresenter
+    fun providePresenter(): MoviesSearchPresenter {
+        return Creator.provideMoviesSearchPresenter(
+            context = this.applicationContext,
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,7 +84,7 @@ class MoviesActivity : AppCompatActivity(), MoviesView {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                moviesSearchPresenter.searchDebounce(
+                moviesSearchPresenter?.searchDebounce(
                     changedText = s?.toString() ?: ""
                 )
             }
@@ -84,40 +93,48 @@ class MoviesActivity : AppCompatActivity(), MoviesView {
             }
         }
         textWatcher?.let { queryInput.addTextChangedListener(it) }
-        moviesSearchPresenter.onCreate()
     }
 
-    override fun showPlaceholderMessage(isVisible: Boolean) {
-        placeholderMessage.visibility = if (isVisible) View.VISIBLE else View.GONE
+    override fun render(state: MoviesState) {
+        when (state) {
+            is MoviesState.Loading -> showLoading()
+            is MoviesState.Content -> showContent(state.movies)
+            is MoviesState.Error -> showError(state.errorMessage)
+            is MoviesState.Empty -> showEmpty(state.message)
+        }
     }
 
-    override fun showMoviesList(isVisible: Boolean) {
-        moviesList.visibility = if (isVisible) View.VISIBLE else View.GONE
+    private fun showLoading() {
+        moviesList.visibility = View.GONE
+        placeholderMessage.visibility = View.GONE
+        progressBar.visibility = View.VISIBLE
     }
 
-    override fun showProgressBar(isVisible: Boolean) {
-        progressBar.visibility = if (isVisible) View.VISIBLE else View.GONE
+    private fun showError(errorMessage: String) {
+        moviesList.visibility = View.GONE
+        placeholderMessage.visibility = View.VISIBLE
+        progressBar.visibility = View.GONE
+
+        placeholderMessage.text = errorMessage
     }
 
-    override fun changePlaceholderText(newPlaceholderText: String) {
-        placeholderMessage.text = newPlaceholderText
+    private fun showEmpty(emptyMessage: String) {
+        showError(emptyMessage)
     }
 
-    override fun updateMoviesList(newMoviesList: List<Movie>) {
+    private fun showContent(movies: List<Movie>) {
+        moviesList.visibility = View.VISIBLE
+        placeholderMessage.visibility = View.GONE
+        progressBar.visibility = View.GONE
+
         adapter.movies.clear()
-        adapter.movies.addAll(newMoviesList)
+        adapter.movies.addAll(movies)
         adapter.notifyDataSetChanged()
     }
 
-    override fun showMessage(message: String) {
+    override fun showToast(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        moviesSearchPresenter.onDestroy()
-    }
-
 
     private fun clickDebounce(): Boolean {
         val current = isClickAllowed

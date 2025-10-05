@@ -8,7 +8,6 @@ import com.example.key_api.domain.api.MoviesInteractor
 import com.example.key_api.domain.api.MoviesRepository
 import com.example.key_api.domain.impl.MoviesInteractorImpl
 import com.example.key_api.presentation.presenters.movies.MoviesSearchPresenter
-import com.example.key_api.presentation.presenters.movies.MoviesView
 import com.example.key_api.presentation.presenters.posters.PosterPresenter
 import com.example.key_api.presentation.presenters.posters.PosterView
 
@@ -23,12 +22,10 @@ object Creator {
     }
 
     fun provideMoviesSearchPresenter(
-        moviesView: MoviesView,
-        context: Context
+        context: Context,
     ): MoviesSearchPresenter {
         return MoviesSearchPresenter(
-            view = moviesView,
-            context = context
+            context = context,
         )
     }
 
