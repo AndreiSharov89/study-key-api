@@ -44,8 +44,7 @@ class MoviesActivity : AppCompatActivity(), MoviesView {
 
     private val moviesSearchPresenter = Creator.provideMoviesSearchPresenter(
         moviesView = this,
-        context = this,
-        adapter = adapter,
+        context = this
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {

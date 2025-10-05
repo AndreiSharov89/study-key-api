@@ -67,6 +67,8 @@ class MoviesSearchPresenter(
                     handler.post {
                         view.showProgressBar(false)
                         if (foundMovies != null) {
+
+                            // Обновляем список на экране
                             movies.clear()
                             movies.addAll(foundMovies)
                             view.updateMoviesList(movies)
@@ -85,7 +87,6 @@ class MoviesSearchPresenter(
                     }
                 }
             })
-
         }
     }
 
@@ -98,6 +99,7 @@ class MoviesSearchPresenter(
 
             view.changePlaceholderText(text)
             if (additionalMessage.isNotEmpty()) {
+                // Добавили метод показа Toast
                 view.showMessage(additionalMessage)
             }
         } else {
@@ -110,6 +112,6 @@ class MoviesSearchPresenter(
     }
 
     fun onDestroy() {
-        handler.removeCallbacks(searchRunnable)
+        handler.removeCallbacksAndMessages(SEARCH_REQUEST_TOKEN)
     }
 }

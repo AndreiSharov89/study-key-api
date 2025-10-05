@@ -6,12 +6,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.key_api.R
+import com.example.key_api.presentation.presenters.posters.PosterPresenter
 import com.example.key_api.presentation.presenters.posters.PosterView
 import com.example.key_api.util.Creator
 
 class PosterActivity : AppCompatActivity(), PosterView {
-    private val posterPresenter = Creator.providePosterPresenter(this)
-
+    private lateinit var posterPresenter: PosterPresenter
     private lateinit var poster: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,13 +19,11 @@ class PosterActivity : AppCompatActivity(), PosterView {
         enableEdgeToEdge()
 
         setContentView(R.layout.activity_poster)
-        posterPresenter.onCreate()
         val imageUrl = intent.extras?.getString("poster", "") ?: ""
         posterPresenter = Creator.providePosterPresenter(this, imageUrl)
 
         setContentView(R.layout.activity_poster)
         poster = findViewById(R.id.ivBigPoster)
-
         posterPresenter.onCreate()
     }
 

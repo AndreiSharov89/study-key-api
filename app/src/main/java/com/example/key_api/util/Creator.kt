@@ -28,7 +28,7 @@ object Creator {
     ): MoviesSearchPresenter {
         return MoviesSearchPresenter(
             view = moviesView,
-            context = context,
+            context = context
         )
     }
 
