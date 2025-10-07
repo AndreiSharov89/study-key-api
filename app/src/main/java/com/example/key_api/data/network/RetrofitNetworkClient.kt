@@ -3,7 +3,6 @@ package com.example.key_api.data.network
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import com.example.key_api.BuildConfig //not so clear until DI
 import com.example.key_api.data.NetworkClient
 import com.example.key_api.data.dto.MoviesSearchRequest
 import com.example.key_api.data.dto.Response
@@ -12,7 +11,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class RetrofitNetworkClient(private val apiKey: String, private val context: Context) :
     NetworkClient {
-    val key: String = BuildConfig.API_KEY //but secure for VCS
+    val key: String = apiKey //but secure for VCS
     private val imdbBaseUrl = "https://tv-api.com"
 
     private val retrofit = Retrofit.Builder()
