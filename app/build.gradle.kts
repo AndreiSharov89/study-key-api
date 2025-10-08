@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("kotlin-kapt")
-
 }
 val localProperties = Properties().apply { load(FileInputStream(rootProject.file("local.properties"))) }
 
@@ -57,10 +56,10 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.retrofit)
     implementation(libs.glide)
-    implementation(libs.moxy)
-    implementation(libs.moxy.android)
-    implementation(libs.moxy.app.compat)
-    kapt(libs.kapt)
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.5.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
+    implementation("androidx.activity:activity-ktx:1.6.1")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

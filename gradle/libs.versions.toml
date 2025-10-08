@@ -12,7 +12,6 @@ constraintlayout = "2.2.1"
 glide = "4.14.2"
 gson = "2.11.0"
 retrofit = "2.9.0"
-moxy = "2.2.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -27,10 +26,7 @@ glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "gl
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson"}
 retrofit = {group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit"}
 converter-gson = {group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit"}
-moxy = { group = "com.github.moxy-community", name = "moxy", version.ref = "moxy" }
-moxy-android = { group = "com.github.moxy-community", name = "moxy-android", version.ref = "moxy" }
-moxy-app-compat = { group = "com.github.moxy-community", name = "moxy-app-compat", version.ref = "moxy" }
-kapt = { group = "com.github.moxy-community", name = "moxy-compiler", version.ref = "moxy" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
