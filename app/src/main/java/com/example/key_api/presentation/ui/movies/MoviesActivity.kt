@@ -159,13 +159,12 @@ class MoviesActivity : Activity(), MoviesView {
         showError(emptyMessage)
     }
 
-    fun showContent(moviesList: List<Movie>){
+    fun showContent(movies: List<Movie>) {
         moviesList.visibility = View.VISIBLE
         placeholderMessage.visibility = View.GONE
         progressBar.visibility = View.GONE
-
         adapter.movies.clear()
-        adapter.movies.addAll(moviesList)
+        adapter.movies.addAll(movies)
         adapter.notifyDataSetChanged()
     }
 
