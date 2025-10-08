@@ -1,5 +1,6 @@
 package com.example.key_api.presentation.ui.movies
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -16,6 +17,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.key_api.MoviesApplication
 import com.example.key_api.R
 import com.example.key_api.domain.models.Movie
 import com.example.key_api.presentation.presenters.movies.MoviesSearchPresenter
@@ -23,11 +25,8 @@ import com.example.key_api.presentation.presenters.movies.MoviesState
 import com.example.key_api.presentation.presenters.movies.MoviesView
 import com.example.key_api.presentation.ui.posters.PosterActivity
 import com.example.key_api.util.Creator
-import moxy.MvpActivity
-import moxy.presenter.InjectPresenter
-import moxy.presenter.ProvidePresenter
 
-class MoviesActivity : MvpActivity(), MoviesView {
+class MoviesActivity : Activity(), MoviesView {
     private lateinit var queryInput: EditText
     private lateinit var placeholderMessage: TextView
     private lateinit var moviesList: RecyclerView
@@ -46,15 +45,7 @@ class MoviesActivity : MvpActivity(), MoviesView {
 
     private val handler = Handler(Looper.getMainLooper())
 
-    @InjectPresenter
-    lateinit var moviesSearchPresenter: MoviesSearchPresenter
-
-    @ProvidePresenter
-    fun providePresenter(): MoviesSearchPresenter {
-        return Creator.provideMoviesSearchPresenter(
-            context = this.applicationContext,
-        )
-    }
+    private var moviesSearchPresenter: MoviesSearchPresenter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,7 +69,16 @@ class MoviesActivity : MvpActivity(), MoviesView {
         moviesList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         moviesList.adapter = adapter
+        moviesSearchPresenter =
+            (this.applicationContext as? MoviesApplication)?.moviesSearchPresenter
 
+        if (moviesSearchPresenter == null) {
+            moviesSearchPresenter = Creator.provideMoviesSearchPresenter(context = this)
+            (this.applicationContext as? MoviesApplication)?.moviesSearchPresenter =
+                moviesSearchPresenter
+        }
+
+        moviesSearchPresenter?.attachView(this)
         textWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
@@ -95,6 +95,43 @@ class MoviesActivity : MvpActivity(), MoviesView {
         textWatcher?.let { queryInput.addTextChangedListener(it) }
     }
 
+    override fun onStart() {
+        super.onStart()
+        moviesSearchPresenter?.attachView(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        moviesSearchPresenter?.attachView(this)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        moviesSearchPresenter?.detachView()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        moviesSearchPresenter?.detachView()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        moviesSearchPresenter?.detachView()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        textWatcher?.let { queryInput.removeTextChangedListener(it) }
+        moviesSearchPresenter?.detachView()
+        moviesSearchPresenter?.onDestroy()
+
+        if (isFinishing()) {
+            (this.application as? MoviesApplication)?.moviesSearchPresenter = null
+        }
+    }
+
     override fun render(state: MoviesState) {
         when (state) {
             is MoviesState.Loading -> showLoading()
@@ -104,13 +141,13 @@ class MoviesActivity : MvpActivity(), MoviesView {
         }
     }
 
-    private fun showLoading() {
+    fun showLoading() {
         moviesList.visibility = View.GONE
         placeholderMessage.visibility = View.GONE
         progressBar.visibility = View.VISIBLE
     }
 
-    private fun showError(errorMessage: String) {
+    fun showError(errorMessage: String) {
         moviesList.visibility = View.GONE
         placeholderMessage.visibility = View.VISIBLE
         progressBar.visibility = View.GONE
@@ -118,17 +155,17 @@ class MoviesActivity : MvpActivity(), MoviesView {
         placeholderMessage.text = errorMessage
     }
 
-    private fun showEmpty(emptyMessage: String) {
+    fun showEmpty(emptyMessage: String) {
         showError(emptyMessage)
     }
 
-    private fun showContent(movies: List<Movie>) {
+    fun showContent(moviesList: List<Movie>){
         moviesList.visibility = View.VISIBLE
         placeholderMessage.visibility = View.GONE
         progressBar.visibility = View.GONE
 
         adapter.movies.clear()
-        adapter.movies.addAll(movies)
+        adapter.movies.addAll(moviesList)
         adapter.notifyDataSetChanged()
     }
 

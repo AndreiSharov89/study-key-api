@@ -1,16 +1,13 @@
 package com.example.key_api.presentation.presenters.movies
 
 import moxy.MvpView
-import moxy.viewstate.strategy.AddToEndSingleStrategy
-import moxy.viewstate.strategy.OneExecutionStateStrategy
-import moxy.viewstate.strategy.StateStrategyType
 
 interface MoviesView : MvpView {
 
-    @StateStrategyType(AddToEndSingleStrategy::class)
+    // Методы, меняющие внешний вид экрана
     fun render(state: MoviesState)
 
-    @StateStrategyType(OneExecutionStateStrategy::class)
+    // Методы «одноразовых событий»
     fun showToast(additionalMessage: String)
 
 }

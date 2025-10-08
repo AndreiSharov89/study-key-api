@@ -9,30 +9,23 @@ import com.example.key_api.R
 import com.example.key_api.domain.api.MoviesInteractor
 import com.example.key_api.domain.models.Movie
 import com.example.key_api.util.Creator
-import moxy.MvpPresenter
 
-class MoviesSearchPresenter(
-    private val context: Context
-) : MvpPresenter<MoviesView>() {
-    /*    private var view: MoviesView? = null
-        private var state: MoviesState? = null*/
-    private var latestSearchText: String? = null
-
-    private val moviesInteractor = Creator.provideMoviesInteractor(context)
+class MoviesSearchPresenter(private val context: Context) {
 
     companion object {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
         private val SEARCH_REQUEST_TOKEN = Any()
     }
 
-    private val movies = ArrayList<Movie>()
-    private var lastSearchText: String? = null
-    private val handler = Handler(Looper.getMainLooper())
+    private val moviesInteractor = Creator.provideMoviesInteractor(context)
 
-    private val searchRunnable = Runnable {
-        val newSearchText = lastSearchText ?: ""
-        searchRequest(newSearchText)
-    }
+    private val movies = ArrayList<Movie>()
+
+    private var view: MoviesView? = null
+    private var state: MoviesState? = null
+    private var latestSearchText: String? = null
+
+    private val handler = Handler(Looper.getMainLooper())
 
     fun searchDebounce(changedText: String) {
         if (latestSearchText == changedText) {
@@ -79,6 +72,7 @@ class MoviesSearchPresenter(
                                         errorMessage = context.getString(R.string.something_went_wrong),
                                     )
                                 )
+                                view?.showToast(errorMessage)
                             }
 
                             movies.isEmpty() -> {
@@ -105,10 +99,20 @@ class MoviesSearchPresenter(
     }
 
     private fun renderState(state: MoviesState) {
-        viewState.render(state)
+        this.state = state
+        this.view?.render(state)
     }
 
-    override fun onDestroy() {
+    fun onDestroy() {
         handler.removeCallbacksAndMessages(SEARCH_REQUEST_TOKEN)
+    }
+
+    fun attachView(view: MoviesView) {
+        this.view = view
+        state?.let { view.render(it) }
+    }
+
+    fun detachView() {
+        this.view = null
     }
 }
