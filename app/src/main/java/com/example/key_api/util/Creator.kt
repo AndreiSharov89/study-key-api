@@ -7,9 +7,6 @@ import com.example.key_api.data.network.RetrofitNetworkClient
 import com.example.key_api.domain.api.MoviesInteractor
 import com.example.key_api.domain.api.MoviesRepository
 import com.example.key_api.domain.impl.MoviesInteractorImpl
-import com.example.key_api.presentation.presenters.movies.MoviesSearchPresenter
-import com.example.key_api.presentation.presenters.posters.PosterPresenter
-import com.example.key_api.presentation.presenters.posters.PosterView
 
 object Creator {
 
@@ -21,18 +18,4 @@ object Creator {
         return MoviesInteractorImpl(getMoviesRepository(context))
     }
 
-    fun provideMoviesSearchPresenter(
-        context: Context,
-    ): MoviesSearchPresenter {
-        return MoviesSearchPresenter(
-            context = context,
-        )
-    }
-
-    fun providePosterPresenter(
-        posterView: PosterView,
-        imageUrl: String
-    ): PosterPresenter {
-        return PosterPresenter(posterView, imageUrl)
-    }
 }

@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.key_api.R
 import com.example.key_api.domain.models.Movie
-import com.example.key_api.presentation.presenters.movies.MoviesSearchPresenter
 import com.example.key_api.presentation.presenters.movies.MoviesState
 import com.example.key_api.presentation.presenters.movies.MoviesViewModel
 import com.example.key_api.presentation.ui.posters.PosterActivity
@@ -42,10 +41,7 @@ class MoviesActivity : AppCompatActivity() {
     }
 
     private var isClickAllowed = true
-
     private val handler = Handler(Looper.getMainLooper())
-
-    private var moviesSearchPresenter: MoviesSearchPresenter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -130,16 +126,16 @@ class MoviesActivity : AppCompatActivity() {
         showError(emptyMessage)
     }
 
-    fun showContent(movies: List<Movie>) {
+    fun showContent(moviesList: List<Movie>) {
         movies.visibility = View.VISIBLE
         placeholderMessage.visibility = View.GONE
         progressBar.visibility = View.GONE
         adapter.movies.clear()
-        adapter.movies.addAll(movies)
+        adapter.movies.addAll(moviesList)
         adapter.notifyDataSetChanged()
     }
 
-    fun showToast(message: String) {
+    fun showToast(message: String?) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 

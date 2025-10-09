@@ -21,7 +21,7 @@ class MoviesViewModel(private val context: Context) : ViewModel() {
     companion object {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
         private val SEARCH_REQUEST_TOKEN = Any()
-        fun getFactory(value: Int): ViewModelProvider.Factory = viewModelFactory {
+        fun getFactory(): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val app = (this[APPLICATION_KEY] as MoviesApplication)
                 MoviesViewModel(app)
