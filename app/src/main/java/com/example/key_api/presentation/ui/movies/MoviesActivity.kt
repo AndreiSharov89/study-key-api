@@ -7,18 +7,13 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.ProgressBar
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.key_api.R
+import com.example.key_api.databinding.ActivityMainBinding
 import com.example.key_api.domain.models.Movie
 import com.example.key_api.presentation.presenters.movies.MoviesState
 import com.example.key_api.presentation.presenters.movies.MoviesViewModel
@@ -26,10 +21,7 @@ import com.example.key_api.presentation.ui.posters.PosterActivity
 
 class MoviesActivity : AppCompatActivity() {
     private var viewModel: MoviesViewModel? = null
-    private lateinit var queryInput: EditText
-    private lateinit var placeholderMessage: TextView
-    private lateinit var movies: RecyclerView
-    private lateinit var progressBar: ProgressBar
+    private lateinit var binding: ActivityMainBinding
     private var textWatcher: TextWatcher? = null
 
     private val adapter = MoviesAdapter {
@@ -45,8 +37,10 @@ class MoviesActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        val rootView = findViewById<LinearLayout>(R.id.main_root_view)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        //setContentView(R.layout.activity_main)
+        val rootView = binding.root
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.setPadding(
@@ -58,13 +52,9 @@ class MoviesActivity : AppCompatActivity() {
             )
             WindowInsetsCompat.CONSUMED
         }
-        placeholderMessage = findViewById(R.id.placeholderMessage)
-        queryInput = findViewById(R.id.queryInput)
-        movies = findViewById(R.id.movies)
-        progressBar = findViewById(R.id.progressBar)
-        movies.layoutManager =
+        binding.movies.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        movies.adapter = adapter
+        binding.movies.adapter = adapter
 
         viewModel = ViewModelProvider(this, MoviesViewModel.getFactory())
             .get(MoviesViewModel::class.java)
@@ -91,12 +81,12 @@ class MoviesActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {
             }
         }
-        textWatcher?.let { queryInput.addTextChangedListener(it) }
+        textWatcher?.let { binding.queryInput.addTextChangedListener(it) }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        textWatcher?.let { queryInput.removeTextChangedListener(it) }
+        textWatcher?.let { binding.queryInput.removeTextChangedListener(it) }
     }
 
     fun render(state: MoviesState) {
@@ -109,17 +99,21 @@ class MoviesActivity : AppCompatActivity() {
     }
 
     fun showLoading() {
-        movies.visibility = View.GONE
-        placeholderMessage.visibility = View.GONE
-        progressBar.visibility = View.VISIBLE
+        binding.apply {
+            movies.visibility = View.GONE
+            placeholderMessage.visibility = View.GONE
+            progressBar.visibility = View.VISIBLE
+        }
     }
 
     fun showError(errorMessage: String) {
-        movies.visibility = View.GONE
-        placeholderMessage.visibility = View.VISIBLE
-        progressBar.visibility = View.GONE
+        binding.apply {
+            movies.visibility = View.GONE
+            placeholderMessage.visibility = View.VISIBLE
+            progressBar.visibility = View.GONE
 
-        placeholderMessage.text = errorMessage
+            placeholderMessage.text = errorMessage
+        }
     }
 
     fun showEmpty(emptyMessage: String) {
@@ -127,12 +121,14 @@ class MoviesActivity : AppCompatActivity() {
     }
 
     fun showContent(moviesList: List<Movie>) {
-        movies.visibility = View.VISIBLE
-        placeholderMessage.visibility = View.GONE
-        progressBar.visibility = View.GONE
-        adapter.movies.clear()
-        adapter.movies.addAll(moviesList)
-        adapter.notifyDataSetChanged()
+        binding.apply {
+            movies.visibility = View.VISIBLE
+            placeholderMessage.visibility = View.GONE
+            progressBar.visibility = View.GONE
+            adapter.movies.clear()
+            adapter.movies.addAll(moviesList)
+            adapter.notifyDataSetChanged()
+        }
     }
 
     fun showToast(message: String?) {

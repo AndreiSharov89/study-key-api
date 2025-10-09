@@ -1,24 +1,23 @@
 package com.example.key_api.presentation.ui.posters
 
 import android.os.Bundle
-import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
-import com.example.key_api.R
+import com.example.key_api.databinding.ActivityPosterBinding
 import com.example.key_api.presentation.presenters.posters.PosterViewModel
 
 
 class PosterActivity : AppCompatActivity() {
     private var viewModel: PosterViewModel? = null
-    private lateinit var poster: ImageView
+    private lateinit var binding: ActivityPosterBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_poster)
-        poster = findViewById(R.id.ivBigPoster)
+        binding = ActivityPosterBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         val imageUrl = intent.extras?.getString("poster", "") ?: ""
         viewModel = ViewModelProvider(
             this,
@@ -33,6 +32,6 @@ class PosterActivity : AppCompatActivity() {
     private fun setupPosterImage(url: String) {
         Glide.with(applicationContext)
             .load(url)
-            .into(poster)
+            .into(binding.ivBigPoster)
     }
 }
