@@ -8,10 +8,8 @@ import com.example.key_api.data.network.RetrofitNetworkClient
 import com.example.key_api.data.storage.PrefsStorageClient
 import com.example.key_api.domain.api.MoviesInteractor
 import com.example.key_api.domain.api.MoviesRepository
-import com.example.key_api.domain.api.SearchHistoryInteractor
 import com.example.key_api.domain.api.SearchHistoryRepository
 import com.example.key_api.domain.impl.MoviesInteractorImpl
-import com.example.key_api.domain.impl.SearchHistoryInteractorImpl
 import com.example.key_api.domain.models.Movie
 import com.google.gson.reflect.TypeToken
 
@@ -32,10 +30,6 @@ object Creator {
                 object : TypeToken<ArrayList<Movie>>() {}.type
             )
         )
-    }
-
-    fun provideSearchHistoryInteractor(context: Context): SearchHistoryInteractor {
-        return SearchHistoryInteractorImpl(getSearchHistoryRepository(context))
     }
 
 }
