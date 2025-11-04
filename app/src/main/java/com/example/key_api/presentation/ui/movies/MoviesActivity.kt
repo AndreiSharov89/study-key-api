@@ -11,16 +11,16 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.key_api.databinding.ActivityMainBinding
 import com.example.key_api.domain.models.Movie
 import com.example.key_api.presentation.presenters.movies.MoviesState
 import com.example.key_api.presentation.presenters.movies.MoviesViewModel
 import com.example.key_api.presentation.ui.posters.PosterActivity
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MoviesActivity : AppCompatActivity() {
-    private var viewModel: MoviesViewModel? = null
+    private val viewModel by viewModel<MoviesViewModel>()
     private lateinit var binding: ActivityMainBinding
     private var textWatcher: TextWatcher? = null
 
@@ -39,7 +39,6 @@ class MoviesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        //setContentView(R.layout.activity_main)
         val rootView = binding.root
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -56,14 +55,11 @@ class MoviesActivity : AppCompatActivity() {
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.movies.adapter = adapter
 
-        viewModel = ViewModelProvider(this, MoviesViewModel.getFactory())
-            .get(MoviesViewModel::class.java)
-
-        viewModel?.observeState()?.observe(this) {
+        viewModel.observeState().observe(this) {
             render(it)
         }
 
-        viewModel?.observeShowToast()?.observe(this) {
+        viewModel.observeShowToast().observe(this) {
             showToast(it)
         }
 
@@ -73,7 +69,7 @@ class MoviesActivity : AppCompatActivity() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                viewModel?.searchDebounce(
+                viewModel.searchDebounce(
                     changedText = s?.toString() ?: ""
                 )
             }
@@ -89,7 +85,7 @@ class MoviesActivity : AppCompatActivity() {
         textWatcher?.let { binding.queryInput.removeTextChangedListener(it) }
     }
 
-    fun render(state: MoviesState) {
+    private fun render(state: MoviesState) {
         when (state) {
             is MoviesState.Loading -> showLoading()
             is MoviesState.Content -> showContent(state.movies)
@@ -98,7 +94,7 @@ class MoviesActivity : AppCompatActivity() {
         }
     }
 
-    fun showLoading() {
+    private fun showLoading() {
         binding.apply {
             movies.visibility = View.GONE
             placeholderMessage.visibility = View.GONE
@@ -106,7 +102,7 @@ class MoviesActivity : AppCompatActivity() {
         }
     }
 
-    fun showError(errorMessage: String) {
+    private fun showError(errorMessage: String) {
         binding.apply {
             movies.visibility = View.GONE
             placeholderMessage.visibility = View.VISIBLE
@@ -116,11 +112,11 @@ class MoviesActivity : AppCompatActivity() {
         }
     }
 
-    fun showEmpty(emptyMessage: String) {
+    private fun showEmpty(emptyMessage: String) {
         showError(emptyMessage)
     }
 
-    fun showContent(moviesList: List<Movie>) {
+    private fun showContent(moviesList: List<Movie>) {
         binding.apply {
             movies.visibility = View.VISIBLE
             placeholderMessage.visibility = View.GONE
@@ -131,8 +127,10 @@ class MoviesActivity : AppCompatActivity() {
         }
     }
 
-    fun showToast(message: String?) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    private fun showToast(message: String?) {
+        if (message != null) {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun clickDebounce(): Boolean {

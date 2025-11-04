@@ -1,35 +1,20 @@
 package com.example.key_api.presentation.presenters.movies
 
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.key_api.MoviesApplication
-import com.example.key_api.R
 import com.example.key_api.domain.api.MoviesInteractor
 import com.example.key_api.domain.models.Movie
-import com.example.key_api.util.Creator
+import com.example.key_api.presentation.SingleLiveEvent
 
-class MoviesViewModel(private val context: Context) : ViewModel() {
+class MoviesViewModel(private val moviesInteractor: MoviesInteractor) : ViewModel() {
     companion object {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
         private val SEARCH_REQUEST_TOKEN = Any()
-        fun getFactory(): ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val app = (this[APPLICATION_KEY] as MoviesApplication)
-                MoviesViewModel(app)
-            }
-        }
     }
-
-    private val moviesInteractor = Creator.provideMoviesInteractor(context)
 
     private val movies = ArrayList<Movie>()
 
@@ -79,7 +64,7 @@ class MoviesViewModel(private val context: Context) : ViewModel() {
                             errorMessage != null -> {
                                 renderState(
                                     MoviesState.Error(
-                                        errorMessage = context.getString(R.string.something_went_wrong),
+                                        errorMessage = "Something went wrong",
                                     )
                                 )
 
@@ -90,7 +75,7 @@ class MoviesViewModel(private val context: Context) : ViewModel() {
                             movies.isEmpty() -> {
                                 renderState(
                                     MoviesState.Empty(
-                                        message = context.getString(R.string.nothing_found),
+                                        message = "Nothing found",
                                     )
                                 )
                             }

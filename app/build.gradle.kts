@@ -6,7 +6,12 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("kotlin-kapt")
 }
-val localProperties = Properties().apply { load(FileInputStream(rootProject.file("local.properties"))) }
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        load(FileInputStream(localPropertiesFile))
+    }
+}
 
 android {
     namespace = "com.example.key_api"
@@ -23,8 +28,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField(
             "String",
-            "API_KEY",
-            "\"${localProperties["API_KEY"]}\""
+            "IMDB_API_KEY",
+            "\"${localProperties.getProperty("imdb.api.key")}\""
         )
     }
 
@@ -59,6 +64,8 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.retrofit)
     implementation(libs.glide)
+    implementation(libs.koin.android)
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.5.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
     implementation("androidx.activity:activity-ktx:1.6.1")
