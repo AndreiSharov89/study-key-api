@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import com.example.key_api.BuildConfig
 import com.example.key_api.data.NetworkClient
+import com.example.key_api.data.dto.MovieDetailsRequest
 import com.example.key_api.data.dto.MoviesSearchRequest
 import com.example.key_api.data.dto.Response
 
@@ -33,10 +34,16 @@ class RetrofitNetworkClient(
         if (!isConnected()) {
             return Response().apply { resultCode = -1 }
         }
-        if (dto !is MoviesSearchRequest) {
+        if ((dto !is MoviesSearchRequest) && (dto !is MovieDetailsRequest)) {
             return Response().apply { resultCode = 400 }
         }
-        val resp = imdbService.getMovies(BuildConfig.IMDB_API_KEY, dto.expression).execute()
+        val resp = if (dto is MoviesSearchRequest)
+            imdbService.getMovies(BuildConfig.IMDB_API_KEY, dto.expression).execute()
+        else imdbService.getMovieDetails(
+            BuildConfig.IMDB_API_KEY,
+            (dto as MovieDetailsRequest).movieId
+        ).execute()
+
         val body = resp.body()
         return if (body != null) {
             body.apply { resultCode = resp.code() }

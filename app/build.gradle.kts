@@ -70,7 +70,10 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
     implementation("androidx.activity:activity-ktx:1.6.1")
     implementation(libs.koin.android)
-
+    val fragment_version = "1.5.5"
+    implementation("androidx.fragment:fragment-ktx:$fragment_version")
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
+    implementation("com.google.android.material:material:1.8.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
