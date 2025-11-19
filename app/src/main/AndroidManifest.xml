@@ -17,7 +17,7 @@
         android:theme="@style/Theme.Keyapi"
         tools:targetApi="31">
         <activity
-            android:name=".presentation.ui.posters.PosterActivity"
+            android:name=".presentation.ui.posters.DetailsActivity"
             android:exported="false" />
         <activity
             android:name=".presentation.ui.movies.MoviesActivity"

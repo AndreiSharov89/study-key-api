@@ -16,7 +16,7 @@ import com.example.key_api.databinding.ActivityMainBinding
 import com.example.key_api.domain.models.Movie
 import com.example.key_api.presentation.presenters.movies.MoviesState
 import com.example.key_api.presentation.presenters.movies.MoviesViewModel
-import com.example.key_api.presentation.ui.posters.PosterActivity
+import com.example.key_api.presentation.ui.posters.DetailsActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MoviesActivity : AppCompatActivity() {
@@ -26,7 +26,7 @@ class MoviesActivity : AppCompatActivity() {
 
     private val adapter = MoviesAdapter {
         if (clickDebounce()) {
-            val intent = Intent(this, PosterActivity::class.java)
+            val intent = Intent(this, DetailsActivity::class.java)
             intent.putExtra("poster", it.image)
             startActivity(intent)
         }
