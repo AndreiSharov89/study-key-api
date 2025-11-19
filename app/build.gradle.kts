@@ -26,21 +26,35 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField(
-            "String",
-            "IMDB_API_KEY",
-            "\"${localProperties.getProperty("imdb.api.key")}\""
-        )
     }
 
     buildTypes {
-        release {
+        debug {
+/*            val imdbApiKey = providers.gradleProperty("API_KEY").getOrElse("")
+            buildConfigField(
+                "String",
+                "IMDB_API_KEY",
+                "\"$imdbApiKey\""
+            )*/
+            buildConfigField(
+                "String",
+                "IMDB_API_KEY",
+                "\"${localProperties.getProperty("API_KEY")}\""
+            )
+        }
+        /*release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-        }
+            val imdbApiKey = providers.gradleProperty("API_KEY").getOrElse("")
+            buildConfigField(
+                "String",
+                "IMDB_API_KEY",
+                "\"$imdbApiKey\""
+            )
+        }*/
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
