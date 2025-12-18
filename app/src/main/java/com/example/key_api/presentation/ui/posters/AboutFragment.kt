@@ -9,6 +9,7 @@ import com.example.key_api.databinding.FragmentAboutBinding
 import com.example.key_api.domain.models.MovieDetails
 import com.example.key_api.presentation.presenters.posters.AboutState
 import com.example.key_api.presentation.presenters.posters.AboutViewModel
+import com.example.key_api.presentation.ui.cast.MoviesCastActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -47,6 +48,14 @@ class AboutFragment : Fragment() {
                 is AboutState.Content -> showDetails(it.movie)
                 is AboutState.Error -> showErrorMessage(it.message)
             }
+        }
+        binding.showCastButton.setOnClickListener {
+            startActivity(
+                MoviesCastActivity.newInstance(
+                    context = requireContext(),
+                    movieId = requireArguments().getString(MOVIE_ID).orEmpty()
+                )
+            )
         }
     }
 

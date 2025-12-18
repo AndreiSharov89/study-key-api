@@ -20,6 +20,9 @@
             android:name=".presentation.ui.posters.DetailsActivity"
             android:exported="false" />
         <activity
+            android:name=".presentation.ui.cast.MoviesCastActivity"
+            android:exported="true" />
+        <activity
             android:name=".presentation.ui.movies.MoviesActivity"
             android:exported="true"
             android:windowSoftInputMode="stateVisible|adjustResize">

@@ -1,11 +1,14 @@
 package com.example.key_api.data
 
+import com.example.key_api.data.dto.MovieCastRequest
+import com.example.key_api.data.dto.MovieCastResponse
 import com.example.key_api.data.dto.MovieDetailsRequest
 import com.example.key_api.data.dto.MovieDetailsResponse
 import com.example.key_api.data.dto.MoviesSearchRequest
 import com.example.key_api.data.dto.MoviesSearchResponse
 import com.example.key_api.domain.api.MoviesRepository
 import com.example.key_api.domain.models.Movie
+import com.example.key_api.domain.models.MovieCast
 import com.example.key_api.domain.models.MovieDetails
 import com.example.key_api.util.Resource
 
@@ -59,6 +62,28 @@ class MoviesRepositoryImpl(private val networkClient: NetworkClient) : MoviesRep
             else -> {
                 Resource.Error("Ошибка сервера")
 
+            }
+        }
+    }
+
+    override fun getMovieCast(movieId: String): Resource<MovieCast> {
+        val response = networkClient.doRequest(MovieCastRequest(movieId))
+        return when (response.resultCode) {
+            -1 -> {
+                Resource.Error("Проверьте подключение к интернету")
+            }
+
+            200 -> {
+                // Осталось написать конвертацию!
+                with(response as MovieCastResponse) {
+                    Resource.Success(
+                        data = TODO("Конвертация данных")
+                    )
+                }
+            }
+
+            else -> {
+                Resource.Error("Ошибка сервера")
             }
         }
     }

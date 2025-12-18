@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import com.example.key_api.BuildConfig
 import com.example.key_api.data.NetworkClient
+import com.example.key_api.data.dto.MovieCastRequest
 import com.example.key_api.data.dto.MovieDetailsRequest
 import com.example.key_api.data.dto.MoviesSearchRequest
 import com.example.key_api.data.dto.Response
@@ -37,18 +38,31 @@ class RetrofitNetworkClient(
         if ((dto !is MoviesSearchRequest) && (dto !is MovieDetailsRequest)) {
             return Response().apply { resultCode = 400 }
         }
-        val resp = if (dto is MoviesSearchRequest)
-            imdbService.getMovies(BuildConfig.IMDB_API_KEY, dto.expression).execute()
-        else imdbService.getMovieDetails(
-            BuildConfig.IMDB_API_KEY,
-            (dto as MovieDetailsRequest).movieId
-        ).execute()
+        if ((dto !is MoviesSearchRequest) && (dto !is MovieDetailsRequest) && (dto !is MovieCastRequest)) {
+            return Response().apply { resultCode = 400 }
+        }
+        val response = when (dto) {
+            is MoviesSearchRequest -> imdbService.getMovies(
+                BuildConfig.IMDB_API_KEY,
+                dto.expression
+            ).execute()
 
-        val body = resp.body()
+            is MovieDetailsRequest -> imdbService.getMovieDetails(
+                BuildConfig.IMDB_API_KEY,
+                dto.movieId
+            ).execute()
+
+            else -> imdbService.getFullCast(
+                BuildConfig.IMDB_API_KEY,
+                (dto as MovieDetailsRequest).movieId
+            ).execute()
+        }
+
+        val body = response.body()
         return if (body != null) {
-            body.apply { resultCode = resp.code() }
+            body.apply { resultCode = response.code() }
         } else {
-            Response().apply { resultCode = resp.code() }
+            Response().apply { resultCode = response.code() }
         }
     }
 }

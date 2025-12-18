@@ -1,5 +1,6 @@
 package com.example.key_api.data.network
 
+import com.example.key_api.data.dto.MovieCastResponse
 import com.example.key_api.data.dto.MovieDetailsResponse
 import com.example.key_api.data.dto.MoviesSearchResponse
 import retrofit2.Call
@@ -18,5 +19,12 @@ interface ImdbApi {
         @Path("key") key: String,
         @Path("movie_id") movieId: String
     ): Call<MovieDetailsResponse>
+
+    @GET("/en/API/FullCast/{key}/{movie_id}")
+    fun getFullCast(
+        @Path("key") key: String,
+        @Path("movie_id") movieId: String
+    )
+            : Call<MovieCastResponse>
 
 }
