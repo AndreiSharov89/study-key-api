@@ -1,5 +1,6 @@
 package com.example.key_api.data
 
+import com.example.key_api.data.converter.MovieCastConverter
 import com.example.key_api.data.dto.MovieCastRequest
 import com.example.key_api.data.dto.MovieCastResponse
 import com.example.key_api.data.dto.MovieDetailsRequest
@@ -12,7 +13,10 @@ import com.example.key_api.domain.models.MovieCast
 import com.example.key_api.domain.models.MovieDetails
 import com.example.key_api.util.Resource
 
-class MoviesRepositoryImpl(private val networkClient: NetworkClient) : MoviesRepository {
+class MoviesRepositoryImpl(
+    private val networkClient: NetworkClient,
+    private val movieCastConverter: MovieCastConverter
+) : MoviesRepository {
 
     override fun searchMovies(expression: String): Resource<List<Movie>> {
         val response = networkClient.doRequest(MoviesSearchRequest(expression))
@@ -72,18 +76,14 @@ class MoviesRepositoryImpl(private val networkClient: NetworkClient) : MoviesRep
             -1 -> {
                 Resource.Error("Проверьте подключение к интернету")
             }
-
             200 -> {
-                // Осталось написать конвертацию!
-                with(response as MovieCastResponse) {
-                    Resource.Success(
-                        data = TODO("Конвертация данных")
-                    )
-                }
+                Resource.Success(
+                    data = movieCastConverter.convert(response as MovieCastResponse)
+                )
             }
-
             else -> {
                 Resource.Error("Ошибка сервера")
+
             }
         }
     }
