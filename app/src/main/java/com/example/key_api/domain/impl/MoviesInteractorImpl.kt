@@ -40,16 +40,21 @@ class MoviesInteractorImpl(private val repository: MoviesRepository) : MoviesInt
             }
         }
     }
+
     override fun getMovieCast(movieId: String, consumer: MoviesInteractor.MovieCastConsumer) {
         executor.execute {
-            when (val resource = repository.getMovieCast(movieId)) {
-                is Resource.Success -> {
-                    consumer.consume(resource.data, null)
-                }
+            try {
+                when (val resource = repository.getMovieCast(movieId)) {
+                    is Resource.Success -> {
+                        consumer.consume(resource.data, null)
+                    }
 
-                is Resource.Error -> {
-                    consumer.consume(resource.data, resource.message)
+                    is Resource.Error -> {
+                        consumer.consume(resource.data, resource.message)
+                    }
                 }
+            } catch (e: Exception) {
+                consumer.consume(null, "Unexpected error: ${e.localizedMessage ?: "unknown"}")
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.example.key_api.di
 
+import com.example.key_api.presentation.presenters.cast.MoviesCastViewModel
 import com.example.key_api.presentation.presenters.movies.MoviesViewModel
 import com.example.key_api.presentation.presenters.posters.AboutViewModel
 import com.example.key_api.presentation.presenters.posters.PosterViewModel
@@ -16,6 +17,9 @@ val viewModelModule = module {
 
     viewModel { (posterUrl: String) ->
         PosterViewModel(posterUrl)
+    }
+    viewModel { (movieId: String) ->
+        MoviesCastViewModel(movieId, get())
     }
 
 }

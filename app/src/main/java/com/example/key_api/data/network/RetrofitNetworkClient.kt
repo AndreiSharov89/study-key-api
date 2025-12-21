@@ -35,9 +35,7 @@ class RetrofitNetworkClient(
         if (!isConnected()) {
             return Response().apply { resultCode = -1 }
         }
-        if ((dto !is MoviesSearchRequest) && (dto !is MovieDetailsRequest)) {
-            return Response().apply { resultCode = 400 }
-        }
+
         if ((dto !is MoviesSearchRequest) && (dto !is MovieDetailsRequest) && (dto !is MovieCastRequest)) {
             return Response().apply { resultCode = 400 }
         }
@@ -54,7 +52,7 @@ class RetrofitNetworkClient(
 
             else -> imdbService.getFullCast(
                 BuildConfig.IMDB_API_KEY,
-                (dto as MovieDetailsRequest).movieId
+                (dto as MovieCastRequest).movieId
             ).execute()
         }
 
