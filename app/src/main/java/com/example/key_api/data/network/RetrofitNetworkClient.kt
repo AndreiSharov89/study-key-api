@@ -15,6 +15,39 @@ class RetrofitNetworkClient(
     private val context: Context
 ) : NetworkClient {
 
+    override fun doRequest(dto: Any): Response {
+        if (!isConnected()) {
+            return Response().apply { resultCode = -1 }
+        }
+
+        if ((dto !is MoviesSearchRequest) && (dto !is MovieDetailsRequest) && (dto !is MovieCastRequest)) {
+            return Response().apply { resultCode = 400 }
+        }
+        val response = when (dto) {
+            is MoviesSearchRequest -> imdbService.getMovies(
+                IMDB_API_KEY,
+                dto.expression
+            ).execute()
+
+            is MovieDetailsRequest -> imdbService.getMovieDetails(
+                IMDB_API_KEY,
+                dto.movieId
+            ).execute()
+
+            else -> imdbService.getFullCast(
+                IMDB_API_KEY,
+                (dto as MovieCastRequest).movieId
+            ).execute()
+        }
+
+        val body = response.body()
+        return if (body != null) {
+            body.apply { resultCode = response.code() }
+        } else {
+            Response().apply { resultCode = response.code() }
+        }
+    }
+
     private fun isConnected(): Boolean {
         val connectivityManager = context.getSystemService(
             Context.CONNECTIVITY_SERVICE
@@ -31,36 +64,7 @@ class RetrofitNetworkClient(
         return false
     }
 
-    override fun doRequest(dto: Any): Response {
-        if (!isConnected()) {
-            return Response().apply { resultCode = -1 }
-        }
-
-        if ((dto !is MoviesSearchRequest) && (dto !is MovieDetailsRequest) && (dto !is MovieCastRequest)) {
-            return Response().apply { resultCode = 400 }
-        }
-        val response = when (dto) {
-            is MoviesSearchRequest -> imdbService.getMovies(
-                BuildConfig.IMDB_API_KEY,
-                dto.expression
-            ).execute()
-
-            is MovieDetailsRequest -> imdbService.getMovieDetails(
-                BuildConfig.IMDB_API_KEY,
-                dto.movieId
-            ).execute()
-
-            else -> imdbService.getFullCast(
-                BuildConfig.IMDB_API_KEY,
-                (dto as MovieCastRequest).movieId
-            ).execute()
-        }
-
-        val body = response.body()
-        return if (body != null) {
-            body.apply { resultCode = response.code() }
-        } else {
-            Response().apply { resultCode = response.code() }
-        }
+    companion object {
+        private const val IMDB_API_KEY = BuildConfig.IMDB_API_KEY
     }
 }

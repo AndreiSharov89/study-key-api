@@ -4,12 +4,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.key_api.R
 import com.example.key_api.databinding.ActivityMoviesCastBinding
 import com.example.key_api.presentation.presenters.cast.MoviesCastState
 import com.example.key_api.presentation.presenters.cast.MoviesCastViewModel
+import com.hannesdorfmann.adapterdelegates4.ListDelegationAdapter
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -28,7 +31,10 @@ class MoviesCastActivity : AppCompatActivity(R.layout.activity_movies_cast) {
     private val moviesCastViewModel: MoviesCastViewModel by viewModel {
         parametersOf(intent.getStringExtra(ARGS_MOVIE_ID))
     }
-    private val adapter = MoviesCastAdapter()
+    private val adapter = ListDelegationAdapter(
+        movieCastHeaderDelegate(),
+        movieCastPersonDelegate(),
+    )
 
     private lateinit var binding: ActivityMoviesCastBinding
 
@@ -37,6 +43,12 @@ class MoviesCastActivity : AppCompatActivity(R.layout.activity_movies_cast) {
 
         binding = ActivityMoviesCastBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
 
         // Привязываем адаптер и LayoutManager к RecyclerView
         binding.moviesCastRecyclerView.adapter = adapter
