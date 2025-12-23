@@ -13,15 +13,15 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.key_api.R
+import com.example.key_api.core.navigation.Router
 import com.example.key_api.databinding.FragmentMoviesBinding
 import com.example.key_api.domain.models.Movie
 import com.example.key_api.presentation.presenters.movies.MoviesState
 import com.example.key_api.presentation.presenters.movies.MoviesViewModel
 import com.example.key_api.presentation.ui.posters.DetailsFragment
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MoviesFragment : Fragment() {
@@ -30,26 +30,15 @@ class MoviesFragment : Fragment() {
     }
 
     private val viewModel by viewModel<MoviesViewModel>()
+    private val router: Router by inject()
     private val adapter = MoviesAdapter { movie ->
         if (clickDebounce()) {
-
-            // Навигируемся на следующий экран
-            parentFragmentManager.commit {
-                replace(
-                    // Указали, в каком контейнере работаем
-                    R.id.rootFragmentContainerView,
-                    // Создали фрагмент
-                    DetailsFragment.newInstance(
-                        movieId = movie.id,
-                        posterUrl = movie.image
-                    ),
-                    // Указали тег фрагмента
-                    DetailsFragment.TAG
+            router.openFragment(
+                DetailsFragment.newInstance(
+                    movieId = movie.id,
+                    posterUrl = movie.image
                 )
-
-                // Добавляем фрагмент в Back Stack
-                addToBackStack(DetailsFragment.TAG)
-            }
+            )
         }
     }
     private val handler = Handler(Looper.getMainLooper())

@@ -3,6 +3,7 @@ package com.example.key_api
 import android.app.Application
 import com.example.key_api.di.dataModule
 import com.example.key_api.di.interactorModule
+import com.example.key_api.di.navigationModule
 import com.example.key_api.di.repositoryModule
 import com.example.key_api.di.viewModelModule
 import org.koin.android.ext.koin.androidContext
@@ -13,7 +14,12 @@ class MoviesApplication : Application() {
         super.onCreate()
         startKoin {
             androidContext(this@MoviesApplication)
-            modules(listOf(dataModule, interactorModule, repositoryModule, viewModelModule))
+            modules(
+                listOf(
+                    dataModule, interactorModule, repositoryModule, viewModelModule,
+                    navigationModule
+                )
+            )
         }
     }
 }
