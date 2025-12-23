@@ -17,18 +17,11 @@
         android:theme="@style/Theme.Keyapi"
         tools:targetApi="31">
         <activity
-            android:name=".presentation.ui.posters.DetailsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".presentation.ui.cast.MoviesCastActivity"
-            android:exported="true" />
-        <activity
-            android:name=".presentation.ui.movies.MoviesActivity"
+            android:name=".presentation.ui.root.RootActivity"
             android:exported="true"
             android:windowSoftInputMode="stateVisible|adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
