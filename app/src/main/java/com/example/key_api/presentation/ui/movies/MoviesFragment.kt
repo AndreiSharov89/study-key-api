@@ -13,8 +13,10 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.key_api.R
 import com.example.key_api.core.navigation.Router
 import com.example.key_api.databinding.FragmentMoviesBinding
 import com.example.key_api.domain.models.Movie
@@ -33,12 +35,9 @@ class MoviesFragment : Fragment() {
     private val router: Router by inject()
     private val adapter = MoviesAdapter { movie ->
         if (clickDebounce()) {
-            router.openFragment(
-                DetailsFragment.newInstance(
-                    movieId = movie.id,
-                    posterUrl = movie.image
-                )
-            )
+            findNavController().navigate(
+                R.id.action_moviesFragment_to_detailsFragment,
+                DetailsFragment.createArgs(movie.id, movie.image))
         }
     }
     private val handler = Handler(Looper.getMainLooper())

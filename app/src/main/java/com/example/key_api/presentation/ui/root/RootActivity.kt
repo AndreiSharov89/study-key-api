@@ -33,21 +33,5 @@ class RootActivity : AppCompatActivity() {
             )
             WindowInsetsCompat.CONSUMED
         }
-
-        if (savedInstanceState == null) {
-            navigator.openFragment(
-                MoviesFragment()
-            )
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        navigatorHolder.attachNavigator(navigator)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        navigatorHolder.detachNavigator()
     }
 }
