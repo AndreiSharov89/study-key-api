@@ -1,6 +1,5 @@
 package com.example.key_api.data.storage
 
-import android.util.Log
 import com.example.key_api.data.NetworkClient
 import com.example.key_api.data.dto.NamesRequest
 import com.example.key_api.data.dto.NamesResponse
@@ -51,24 +50,41 @@ class NamesRepositoryImpl(private val networkClient: NetworkClient) : NamesRepos
     private fun getPersonDescription(id: String): String {
         val response = networkClient.doRequest(NamesRequest(id))
 
-        // Fix 1: Correct the debug log (use 'response' instead of 'myData')
-        Log.d(
-            "DEBUG",
-            "Request ID: $id, Response Type: ${response::class.java.simpleName}, Code: ${response.resultCode}"
-        )
-
         return if (response.resultCode == 200) {
-            // Fix 2: Check the type before casting to avoid ClassCastException
-            if (response is NamesResponse && response.result != null) {
-                response.result.summary ?: "No summary available"
+            if (response is NamesResponse) {
+                val rawSummary = response.summary ?: "No summary available"
+                val personName = response.name ?: "" // Get the name to remove it from summary
+
+                // 1. Unescape HTML (removes &quot;, &apos;, etc.)
+                val cleanSummary =
+                    android.text.Html.fromHtml(rawSummary, android.text.Html.FROM_HTML_MODE_LEGACY)
+                        .toString()
+
+                // 2. Shorten and clean the text
+                shortenSummary(cleanSummary, personName)
             } else {
-                // This is where your crash was happening.
-                // If it hits this line, your NetworkClient is returning the wrong class type.
-                Log.e("ERROR", "Expected NamesResponse but got ${response::class.java.simpleName}")
                 "Data format error"
             }
         } else {
             "Error code: ${response.resultCode}"
+        }
+    }
+
+    private fun shortenSummary(text: String, name: String): String {
+        // 1. Remove the repeating name from the beginning if it exists
+        // Regex looks for the name followed by a dot and space at the very start
+        var processedText = if (name.isNotEmpty() && text.startsWith("$name.")) {
+            text.removePrefix("$name.").trimStart()
+        } else {
+            text
+        }
+
+        // 2. Trim after the second dot
+        val sentences = processedText.split(". ")
+        return if (sentences.size > 2) {
+            "${sentences[0]}. ${sentences[1]}..."
+        } else {
+            processedText
         }
     }
 }

@@ -41,6 +41,8 @@
             android:textColor="@color/black"
             android:textSize="16sp"
             android:textStyle="italic"
+            android:ellipsize="end"
+            android:maxLines="2"
             tools:text="@tools:sample/lorem" />
     </LinearLayout>
 </LinearLayout>
