@@ -19,7 +19,7 @@
         <activity
             android:name=".presentation.ui.root.RootActivity"
             android:exported="true"
-            android:windowSoftInputMode="stateVisible|adjustResize">
+            android:windowSoftInputMode="adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

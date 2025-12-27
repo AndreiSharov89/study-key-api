@@ -8,6 +8,8 @@ import com.example.key_api.data.NetworkClient
 import com.example.key_api.data.dto.MovieCastRequest
 import com.example.key_api.data.dto.MovieDetailsRequest
 import com.example.key_api.data.dto.MoviesSearchRequest
+import com.example.key_api.data.dto.NamesRequest
+import com.example.key_api.data.dto.NamesSearchRequest
 import com.example.key_api.data.dto.Response
 
 class RetrofitNetworkClient(
@@ -20,10 +22,24 @@ class RetrofitNetworkClient(
             return Response().apply { resultCode = -1 }
         }
 
-        if ((dto !is MoviesSearchRequest) && (dto !is MovieDetailsRequest) && (dto !is MovieCastRequest)) {
+        if ((dto !is MoviesSearchRequest) && (dto !is MovieDetailsRequest) && (dto !is MovieCastRequest)
+            && (dto !is NamesSearchRequest) && (dto !is NamesRequest)
+        ) {
             return Response().apply { resultCode = 400 }
         }
         val response = when (dto) {
+            is NamesRequest -> imdbService.names(
+                IMDB_API_KEY,
+                dto.id
+            )
+                .execute()
+
+            is NamesSearchRequest -> imdbService.searchNames(
+                IMDB_API_KEY,
+                dto.expression
+            )
+                .execute()
+
             is MoviesSearchRequest -> imdbService.getMovies(
                 IMDB_API_KEY,
                 dto.expression
