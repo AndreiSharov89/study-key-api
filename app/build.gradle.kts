@@ -83,12 +83,14 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.retrofit)
     implementation(libs.glide)
+    kapt(libs.glide.compiler)
     implementation(libs.koin.android)
     implementation(libs.adapterdelegates4)
     implementation(libs.adapterdelegates4.viewbinding)
     implementation(libs.okhttp3)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.kotlinx.coroutines.android)
 
 
     testImplementation(libs.junit)

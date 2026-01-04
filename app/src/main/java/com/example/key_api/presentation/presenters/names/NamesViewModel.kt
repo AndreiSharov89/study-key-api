@@ -9,8 +9,7 @@ import com.example.key_api.R
 import com.example.key_api.domain.api.NamesInteractor
 import com.example.key_api.domain.models.Person
 import com.example.key_api.presentation.SingleLiveEvent
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import com.example.key_api.util.debounce
 import kotlinx.coroutines.launch
 
 class NamesViewModel(
@@ -20,10 +19,7 @@ class NamesViewModel(
 
     companion object {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
-        private val SEARCH_REQUEST_TOKEN = Any()
     }
-
-    private var searchJob: Job? = null
 
     private val stateLiveData = MutableLiveData<NamesState>()
     fun observeState(): LiveData<NamesState> = stateLiveData
@@ -33,18 +29,15 @@ class NamesViewModel(
 
     private var latestSearchText: String? = null
 
-    fun searchDebounce(changedText: String) {
-        if (latestSearchText == changedText) {
-            return
-        }
-
-        this.latestSearchText = changedText
-
-        // Cancel the previous job if the user types again within 2 seconds
-        searchJob?.cancel()
-        searchJob = viewModelScope.launch {
-            delay(SEARCH_DEBOUNCE_DELAY)
+    private val movieSearchDebounce =
+        debounce<String>(SEARCH_DEBOUNCE_DELAY, viewModelScope, true) { changedText ->
             searchRequest(changedText)
+        }
+    fun searchDebounce(changedText: String) {
+
+        if (latestSearchText != changedText) {
+            latestSearchText = changedText
+            movieSearchDebounce(changedText)
         }
     }
 
