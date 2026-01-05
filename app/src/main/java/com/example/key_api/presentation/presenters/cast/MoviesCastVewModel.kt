@@ -3,8 +3,10 @@ package com.example.key_api.presentation.presenters.cast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.key_api.domain.api.MoviesInteractor
 import com.example.key_api.domain.models.MovieCast
+import kotlinx.coroutines.launch
 
 class MoviesCastViewModel(
     private val movieId: String,
@@ -16,18 +18,25 @@ class MoviesCastViewModel(
     init {
         stateLiveData.postValue(MoviesCastState.Loading)
 
-        moviesInteractor.getMovieCast(movieId, object : MoviesInteractor.MovieCastConsumer {
+        viewModelScope.launch {
+            moviesInteractor.getMovieCast(movieId).collect { pair ->
+                processResult(pair.first, pair.second)
+            }
+        }
+    }
 
-            override fun consume(movieCast: MovieCast?, errorMessage: String?) {
-                if (movieCast != null) {
-                    // добавляем конвертацию в UiState
-                    stateLiveData.postValue(castToUiStateContent(movieCast))
-                } else {
-                    stateLiveData.postValue(MoviesCastState.Error(errorMessage ?: "Unknown error"))
-                }
+
+    private fun processResult(movieCast: MovieCast?, errorMessage: String?) {
+
+        when {
+            (movieCast != null) -> {
+                stateLiveData.postValue(castToUiStateContent(movieCast))
             }
 
-        })
+            else -> {
+                stateLiveData.postValue(MoviesCastState.Error(errorMessage ?: "Unknown error"))
+            }
+        }
     }
 
     private fun castToUiStateContent(cast: MovieCast): MoviesCastState {

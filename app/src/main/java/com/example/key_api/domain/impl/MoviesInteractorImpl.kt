@@ -2,59 +2,38 @@ package com.example.key_api.domain.impl
 
 import com.example.key_api.domain.api.MoviesInteractor
 import com.example.key_api.domain.api.MoviesRepository
+import com.example.key_api.domain.models.Movie
+import com.example.key_api.domain.models.MovieCast
+import com.example.key_api.domain.models.MovieDetails
 import com.example.key_api.util.Resource
-import java.util.concurrent.Executors
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class MoviesInteractorImpl(private val repository: MoviesRepository) : MoviesInteractor {
-    private val executor = Executors.newCachedThreadPool()
-    override fun searchMovies(expression: String, consumer: MoviesInteractor.MoviesConsumer) {
-        executor.execute {
-            try {
-                when (val result = repository.searchMovies(expression)) {
-                    is Resource.Success -> consumer.consume(result.data, null)
-                    is Resource.Error -> consumer.consume(null, result.message)
-                }
-            } catch (e: Exception) {
-                consumer.consume(null, "Unexpected error: ${e.localizedMessage ?: "unknown"}")
+
+    override suspend fun searchMovies(expression: String): Flow<Pair<List<Movie>?, String?>> {
+        return repository.searchMovies(expression).map { result ->
+            when (result) {
+                is Resource.Success -> Pair(result.data, null)
+                is Resource.Error -> Pair(null, result.message)
             }
         }
     }
 
-    override fun getMoviesDetails(
-        movieId: String,
-        consumer: MoviesInteractor.MovieDetailsConsumer
-    ) {
-        executor.execute {
-            try {
-                when (val resource = repository.getMovieDetails(movieId)) {
-                    is Resource.Success -> {
-                        consumer.consume(resource.data, null)
-                    }
-
-                    is Resource.Error -> {
-                        consumer.consume(resource.data, resource.message)
-                    }
-                }
-            } catch (e: Exception) {
-                consumer.consume(null, "Unexpected error: ${e.localizedMessage ?: "unknown"}")
+    override suspend fun getMoviesDetails(movieId: String): Flow<Pair<MovieDetails?, String?>> {
+        return repository.getMovieDetails(movieId).map { result ->
+            when (result) {
+                is Resource.Success -> Pair(result.data, null)
+                is Resource.Error -> Pair(null, result.message)
             }
         }
     }
 
-    override fun getMovieCast(movieId: String, consumer: MoviesInteractor.MovieCastConsumer) {
-        executor.execute {
-            try {
-                when (val resource = repository.getMovieCast(movieId)) {
-                    is Resource.Success -> {
-                        consumer.consume(resource.data, null)
-                    }
-
-                    is Resource.Error -> {
-                        consumer.consume(resource.data, resource.message)
-                    }
-                }
-            } catch (e: Exception) {
-                consumer.consume(null, "Unexpected error: ${e.localizedMessage ?: "unknown"}")
+    override suspend fun getMovieCast(movieId: String): Flow<Pair<MovieCast?, String?>> {
+        return repository.getMovieCast(movieId).map { result ->
+            when (result) {
+                is Resource.Success -> Pair(result.data, null)
+                is Resource.Error -> Pair(null, result.message)
             }
         }
     }

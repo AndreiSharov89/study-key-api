@@ -11,13 +11,15 @@ import com.example.key_api.data.dto.MoviesSearchRequest
 import com.example.key_api.data.dto.NamesRequest
 import com.example.key_api.data.dto.NamesSearchRequest
 import com.example.key_api.data.dto.Response
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class RetrofitNetworkClient(
     private val imdbService: ImdbApi,
     private val context: Context
 ) : NetworkClient {
 
-    override fun doRequest(dto: Any): Response {
+    override suspend fun doRequest(dto: Any): Response {
         if (!isConnected()) {
             return Response().apply { resultCode = -1 }
         }
@@ -27,40 +29,21 @@ class RetrofitNetworkClient(
         ) {
             return Response().apply { resultCode = 400 }
         }
-        val response = when (dto) {
-            is NamesRequest -> imdbService.names(
-                IMDB_API_KEY,
-                dto.id
-            )
-                .execute()
 
-            is NamesSearchRequest -> imdbService.searchNames(
-                IMDB_API_KEY,
-                dto.expression
-            )
-                .execute()
-
-            is MoviesSearchRequest -> imdbService.getMovies(
-                IMDB_API_KEY,
-                dto.expression
-            ).execute()
-
-            is MovieDetailsRequest -> imdbService.getMovieDetails(
-                IMDB_API_KEY,
-                dto.movieId
-            ).execute()
-
-            else -> imdbService.getFullCast(
-                IMDB_API_KEY,
-                (dto as MovieCastRequest).movieId
-            ).execute()
-        }
-
-        val body = response.body()
-        return if (body != null) {
-            body.apply { resultCode = response.code() }
-        } else {
-            Response().apply { resultCode = response.code() }
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = when (dto) {
+                    is NamesSearchRequest -> imdbService.searchNames(IMDB_API_KEY, dto.expression)
+                    is NamesRequest -> imdbService.names(IMDB_API_KEY, dto.id)
+                    is MoviesSearchRequest -> imdbService.getMovies(IMDB_API_KEY, dto.expression)
+                    is MovieDetailsRequest -> imdbService.getMovieDetails(IMDB_API_KEY, dto.movieId)
+                    is MovieCastRequest -> imdbService.getFullCast(IMDB_API_KEY, dto.movieId)
+                    else -> throw IllegalArgumentException("Unknown request type")
+                }
+                response.apply { resultCode = 200 }
+            } catch (e: Exception) {
+                Response().apply { resultCode = 500 }
+            }
         }
     }
 

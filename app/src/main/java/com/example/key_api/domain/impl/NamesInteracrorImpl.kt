@@ -2,28 +2,22 @@ package com.example.key_api.domain.impl
 
 import com.example.key_api.domain.api.NamesInteractor
 import com.example.key_api.domain.api.NamesRepository
+import com.example.key_api.domain.models.Person
 import com.example.key_api.util.Resource
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class NamesInteracrorImpl(private val repository: NamesRepository) : NamesInteractor {
 
-    override suspend fun searchNames(expression: String, consumer: NamesInteractor.NamesConsumer) {
-        // Use withContext(Dispatchers.IO) to switch to the background thread correctly
-        withContext(Dispatchers.IO) {
-            val resource = repository.searchNames(expression)
+    override suspend fun searchNames(expression: String): Flow<Pair<List<Person>?, String?>> {
+        return repository.searchNames(expression).map { result ->
+            when (result) {
+                is Resource.Success -> {
+                    Pair(result.data, null)
+                }
 
-            // Switch back to Main thread if your consumer interacts with the UI (optional, but safer)
-            withContext(Dispatchers.Main) {
-                when (resource) {
-                    is Resource.Success -> {
-                        consumer.consume(resource.data, null)
-                    }
-
-                    is Resource.Error -> {
-                        // Pass null for data and the message for the error
-                        consumer.consume(null, resource.message)
-                    }
+                is Resource.Error -> {
+                    Pair(null, result.message)
                 }
             }
         }
