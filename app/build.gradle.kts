@@ -39,7 +39,7 @@ android {
             buildConfigField(
                 "String",
                 "IMDB_API_KEY",
-                "\"${localProperties.getProperty("imdb.api.key")}\""
+                "\"${localProperties.getProperty("API_KEY")}\""
             )
         }
         /*release {
@@ -91,7 +91,9 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.kotlinx.coroutines.android)
-
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    kapt(libs.room.compiler)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

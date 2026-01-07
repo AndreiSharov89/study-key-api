@@ -3,6 +3,8 @@ package com.example.key_api.di
 import com.example.key_api.domain.api.MoviesInteractor
 import com.example.key_api.domain.api.NamesInteractor
 import com.example.key_api.domain.api.SearchHistoryInteractor
+import com.example.key_api.domain.db.HistoryInteractor
+import com.example.key_api.domain.impl.HistoryInteractorImpl
 import com.example.key_api.domain.impl.MoviesInteractorImpl
 import com.example.key_api.domain.impl.NamesInteracrorImpl
 import com.example.key_api.domain.impl.SearchHistoryInteractorImpl
@@ -17,5 +19,8 @@ val interactorModule = module {
     }
     single<NamesInteractor> {
         NamesInteracrorImpl(get())
+    }
+    single<HistoryInteractor> {
+        HistoryInteractorImpl(get())
     }
 }

@@ -1,6 +1,7 @@
 package com.example.key_api.di
 
 import com.example.key_api.presentation.presenters.cast.MoviesCastViewModel
+import com.example.key_api.presentation.presenters.history.HistoryViewModel
 import com.example.key_api.presentation.presenters.movies.MoviesViewModel
 import com.example.key_api.presentation.presenters.names.NamesViewModel
 import com.example.key_api.presentation.presenters.posters.AboutViewModel
@@ -25,6 +26,9 @@ val viewModelModule = module {
     }
     viewModel {
         NamesViewModel(androidContext(), get())
+    }
+    viewModel {
+        HistoryViewModel(androidContext(), get())
     }
 
 }

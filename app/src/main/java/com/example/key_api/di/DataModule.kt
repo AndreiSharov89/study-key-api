@@ -1,7 +1,9 @@
 package com.example.key_api.di
 
 import android.content.Context
+import androidx.room.Room
 import com.example.key_api.data.NetworkClient
+import com.example.key_api.data.db.AppDatabase
 import com.example.key_api.data.network.ImdbApi
 import com.example.key_api.data.network.RetrofitNetworkClient
 import com.google.gson.Gson
@@ -40,6 +42,11 @@ val dataModule = module {
 
     single<NetworkClient> {
         RetrofitNetworkClient(get(), androidContext())
+    }
+
+    single {
+        Room.databaseBuilder(androidContext(), AppDatabase::class.java, "database.db")
+            .build()
     }
 
 }

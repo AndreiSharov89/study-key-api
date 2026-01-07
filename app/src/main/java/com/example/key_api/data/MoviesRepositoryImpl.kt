@@ -1,6 +1,8 @@
 package com.example.key_api.data
 
 import com.example.key_api.data.converter.MovieCastConverter
+import com.example.key_api.data.converter.MovieDbConverter
+import com.example.key_api.data.db.AppDatabase
 import com.example.key_api.data.dto.MovieCastRequest
 import com.example.key_api.data.dto.MovieCastResponse
 import com.example.key_api.data.dto.MovieDetailsRequest
@@ -19,7 +21,9 @@ import kotlinx.coroutines.flow.flowOn
 
 class MoviesRepositoryImpl(
     private val networkClient: NetworkClient,
-    private val movieCastConverter: MovieCastConverter
+    private val movieCastConverter: MovieCastConverter,
+    private val appDatabase: AppDatabase,
+    private val movieDbConverter: MovieDbConverter,
 ) : MoviesRepository {
 
     override suspend fun searchMovies(expression: String): Flow<Resource<List<Movie>>> = flow {
@@ -28,10 +32,13 @@ class MoviesRepositoryImpl(
             -1 -> emit(Resource.Error("Проверьте подключение к интернету"))
 
             200 -> {
-                val searchResponse = response as MoviesSearchResponse
-                emit(Resource.Success(searchResponse.results.map {
-                    Movie(it.id, it.resultType, it.image, it.title, it.description)
-                }))
+                with(response as MoviesSearchResponse) {
+                    val data = results.map {
+                        Movie(it.id, it.resultType, it.image, it.title, it.description)
+                    }
+                    saveMovie(data)
+                    emit(Resource.Success(data))
+                }
             }
 
             else -> emit(Resource.Error("Ошибка сервера"))
@@ -79,4 +86,9 @@ class MoviesRepositoryImpl(
             else -> emit(Resource.Error<MovieCast>("Ошибка сервера"))
         }
     }.flowOn(Dispatchers.IO)
+
+    private suspend fun saveMovie(movies: List<Movie>) {
+        val movieEntities = movies.map { movie -> movieDbConverter.map(movie) }
+        appDatabase.movieDao().insertMovies(movieEntities)
+    }
 }

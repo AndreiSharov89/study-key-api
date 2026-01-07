@@ -42,6 +42,11 @@
         android:label="fragment_names"
         tools:layout="@layout/fragment_names" />
     <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.example.key_api.presentation.ui.history.HistoryFragment"
+        android:label="fragment_history"
+        tools:layout="@layout/fragment_history" />
+    <fragment
         android:id="@+id/infoFragment"
         android:name="com.example.key_api.presentation.ui.info.InfoFragment"
         android:label="fragment_info"
