@@ -2,6 +2,7 @@ package com.example.key_api.presentation.ui.root
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -9,6 +10,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.key_api.R
 import com.example.key_api.databinding.ActivityRootBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class RootActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRootBinding
@@ -18,6 +20,8 @@ class RootActivity : AppCompatActivity() {
             fragmentContainerViewId = R.id.rootFragmentContainerView,
             fragmentManager = supportFragmentManager
         )*/
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRootBinding.inflate(layoutInflater)
@@ -50,6 +54,20 @@ class RootActivity : AppCompatActivity() {
                 }
             }
         }
+
+        val exitDialog = MaterialAlertDialogBuilder(this)
+            .setTitle("Выход из приложения")
+            .setMessage("Вы действительно хотите выйти из приложения?")
+            .setNegativeButton("Нет") { dialog, which -> }
+            .setPositiveButton("Да") { dialog, which ->
+                finish()
+            }
+        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                exitDialog.show()
+            }
+        })
+
     }
     fun animateBottomNavigationView() {
         binding.bottomNavigationView.visibility = View.GONE
